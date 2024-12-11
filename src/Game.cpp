@@ -101,6 +101,9 @@ void Game::InitializeGameEngine()
 		return;
 	}
 
+	//init own items
+	InitPillars();
+
 	m_Initialized = true;
 }
 
@@ -242,6 +245,40 @@ void Game::ManageEnergySpeed(float deltaTime)
 	//cap energy
 	if (m_PlayerPosition[2] >= 100) m_PlayerPosition[2] = 100;
 }
+
+void Game::InitPillars()
+{
+	//pillar 1
+	pillar pillar1;
+	pillar1.position = ThreeBlade{ m_Window.width / 4 * 1,m_Window.height / 3 * 2,0 };
+	pillar1.size = 30.f;
+	pillar1.isSelected = true;
+	m_PillarsVec.emplace_back(pillar1);
+
+	//assign colors to the pillars
+	ColorPillars();
+}
+
+void Game::ColorPillars()
+{
+	//Make the selected pillar pink and the others purple
+	for (auto &p : m_PillarsVec)
+	{
+		if (p.isSelected == true) p.color = Color4f{ 0.8f,0.02f,0.5f,1.f };
+		else p.color = Color4f{ 0.2f,0.01f,0.4f,1.f };
+	}
+}
+
+void Game::DrawPillars() const
+{
+	//draw all the pillars on screen
+	for(auto p : m_PillarsVec)
+	{
+		utils::SetColor(p.color);
+		utils::FillRect(p.position[0], p.position[1], p.size, p.size);
+	}
+}
+
 void Game::Update(float elapsedSec)
 {
 	//---------TESTINGS
@@ -272,4 +309,5 @@ void Game::Draw() const
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	DrawPlayer();
+	DrawPillars();
 }

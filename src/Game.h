@@ -3,6 +3,7 @@
 #include "structs.h"
 #include "SDL.h"
 #include "SDL_opengl.h"
+#include <vector>
 
 class Game
 {
@@ -90,4 +91,21 @@ private:
 	void CheckWindowCollision();
 	void VisualizeEnergy();
 	void ManageEnergySpeed(float deltaTime);
+
+
+	//Pillar
+	struct pillar
+	{
+		ThreeBlade position;
+		Color4f color;
+		float size;
+		bool isSelected;
+	};
+
+	std::vector<pillar> m_PillarsVec{};
+
+	//pillar functions
+	void InitPillars();
+	void ColorPillars();
+	void DrawPillars() const;
 };
