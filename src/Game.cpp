@@ -237,7 +237,7 @@ void Game::MakeStuff() const
 	//try testing translation
 	//auto translation = Motor::Translation(80, TwoBlade(1, 0, 0, 0, 0, 0));
 	//threeB = (translation* threeB * ~translation).Grade3();
-
+	//test
 	//paint your stuff
 	utils::SetColor(Color4f{ 1,1,1,1 });
 	utils::FillRect(m_Position[0], m_Position[1], 20, 20);
