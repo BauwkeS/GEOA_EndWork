@@ -1,4 +1,5 @@
 #pragma once
+#include "FlyFish.h"
 #include "structs.h"
 #include "SDL.h"
 #include "SDL_opengl.h"
@@ -19,6 +20,8 @@ public:
 	void Update(float elapsedSec);
 
 	void Draw() const;
+
+	void MakeStuff() const;
 
 	// Event handling
 	void ProcessKeyDownEvent(const SDL_KeyboardEvent& e)
@@ -60,7 +63,9 @@ private:
 	bool m_Initialized;
 	// Prevent timing jumps when debugging
 	const float m_MaxElapsedSeconds;
-	
+
+	ThreeBlade m_Position{ 200,200,0 };
+
 	// FUNCTIONS
 	void InitializeGameEngine( );
 	void CleanupGameEngine( );

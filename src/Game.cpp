@@ -5,6 +5,7 @@
 #include <SDL_ttf.h>
 #include <chrono>
 #include "Game.h"
+
 #include "utils.h"
 #include "structs.h"
 
@@ -193,8 +194,51 @@ void Game::CleanupGameEngine()
 
 void Game::Update(float elapsedSec)
 {
+	////translation
+	Motor translator{ Motor::Translation(-400,TwoBlade(1, 1, 0, 0, 0, 0)) };
+	m_Position = (translator * m_Position * ~translator).Grade3();
+
+	//rotation
+	Motor rotation{ Motor::Rotation(-45*elapsedSec,TwoBlade(0, 0, 0 ,0,0,1)) };
+	m_Position = (rotation * m_Position * ~rotation).Grade3();
+
+	Motor translator2{ Motor::Translation(400,TwoBlade(1, 1, 0, 0, 0, 0)) };
+	m_Position = (translator2 * m_Position * ~translator2).Grade3();
+
 }
 
 void Game::Draw() const
 {
+	MakeStuff();
+}
+
+void Game::MakeStuff() const
+{
+	//clear the screen
+	glClearColor(0.f,0.f,0.f,1.f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+
+	//test a 1 blade
+	/*OneBlade oneB1{ -1, 10, 10, 3 };
+	utils::SetColor(Color4f{ 1,1,1,1 });
+	utils::FillRect(oneB1[1],oneB1[2], 100, 100);*/
+
+	//test a 2 blade
+	/*TwoBlade twoB{ 100,200,300,0,0,0 };
+	utils::SetColor(Color4f{ 1,1,1,1 });
+	utils::FillRect(twoB[0],twoB[0], 100, 100);*/
+
+
+	//ThreeBlade threeB{ 200,400,0 };
+	//utils::SetColor(Color4f{ 1,1,1,1 });
+//	utils::FillRect(threeB[0], threeB[1], 20, 20);
+
+	//try testing translation
+	//auto translation = Motor::Translation(80, TwoBlade(1, 0, 0, 0, 0, 0));
+	//threeB = (translation* threeB * ~translation).Grade3();
+
+	//paint your stuff
+	utils::SetColor(Color4f{ 1,1,1,1 });
+	utils::FillRect(m_Position[0], m_Position[1], 20, 20);
 }
