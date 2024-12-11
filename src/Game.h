@@ -25,16 +25,8 @@ public:
 	// Event handling
 	void ProcessKeyDownEvent(const SDL_KeyboardEvent& e)
 	{
-		//when pressing S => enable or disable speed
-		if (e.keysym.sym == SDLK_s)
-		{
-			//start speeding if you have some energy
-			if(m_PlayerSpeed == m_NormalPlayerSpeed)
-			{
-				if (m_PlayerPosition[2] >= 10) m_PlayerSpeed *= 2.f;
-			}
-			else m_PlayerSpeed = m_NormalPlayerSpeed; //stop speeding
-		}
+		KeyboardSpeed(e);
+		KeyboardPillar(e);
 	}
 	void ProcessKeyUpEvent(const SDL_KeyboardEvent& e)
 	{
@@ -109,4 +101,9 @@ private:
 	void InitPillars();
 	void ColorPillars();
 	void DrawPillars() const;
+
+
+	//Keyboard functions
+	void KeyboardSpeed(const SDL_KeyboardEvent& e);
+	void KeyboardPillar(const SDL_KeyboardEvent& e);
 };

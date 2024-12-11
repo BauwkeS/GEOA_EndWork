@@ -5,6 +5,9 @@
 #include <SDL_ttf.h>
 #include <chrono>
 #include "Game.h"
+#include <stdio.h>      
+#include <stdlib.h>     
+#include <time.h>
 
 #include "utils.h"
 #include "structs.h"
@@ -269,6 +272,7 @@ void Game::InitPillars()
 	pillar pillar2;
 	pillar2.position = ThreeBlade{ m_Window.width / 4 * 3,m_Window.height / 3 * 1,0 };
 	pillar2.size = 15.f;
+	pillar2.isSelected = false;
 	m_PillarsVec.emplace_back(pillar2);
 
 	//assign colors to the pillars
@@ -293,6 +297,52 @@ void Game::DrawPillars() const
 		utils::SetColor(p.color);
 		utils::FillRect(p.position[0], p.position[1], p.size, p.size);
 	}
+}
+
+void Game::KeyboardSpeed(const SDL_KeyboardEvent& e)
+{
+	//when pressing S => enable or disable speed
+	if (e.keysym.sym == SDLK_s)
+	{
+		//start speeding if you have some energy
+		if (m_PlayerSpeed == m_NormalPlayerSpeed)
+		{
+			if (m_PlayerPosition[2] >= 10) m_PlayerSpeed *= 2.f;
+		}
+		else m_PlayerSpeed = m_NormalPlayerSpeed; //stop speeding
+	}
+}
+
+void Game::KeyboardPillar(const SDL_KeyboardEvent& e)
+{
+	//when pressing E => switch to another pillar
+	int activePillarIndex{};
+	int newActivePillarIndex{};
+
+	//search for active pillar
+	for (int i = 0; i < static_cast<int>(m_PillarsVec.size()); ++i)
+	{
+		//local store the ID of the active pillar
+		if (m_PillarsVec[i].isSelected) activePillarIndex = i;
+	}
+	std::cout << "active pillar is: " << activePillarIndex << std::endl;
+	//search for another pillar that is not the active one
+	do
+	{
+		newActivePillarIndex = rand() % static_cast<int>(m_PillarsVec.size());
+	} while (newActivePillarIndex == activePillarIndex);
+
+	std::cout << "new pillar is: " << newActivePillarIndex << std::endl;
+
+	//make every pillar BUT the new one deselected
+	for (int i = 0; i < m_PillarsVec.size(); ++i)
+	{
+		if (i != newActivePillarIndex) m_PillarsVec[i].isSelected = false;
+		else m_PillarsVec[i].isSelected = true;
+	}
+
+	//change colors
+	ColorPillars();
 }
 
 void Game::Update(float elapsedSec)
