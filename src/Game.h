@@ -28,11 +28,11 @@ public:
 		if (e.keysym.sym == SDLK_s)
 		{
 			//start speeding if you have some energy
-			if(player1.m_PlayerSpeed == player1.m_NormalPlayerSpeed)
+			if(m_PlayerSpeed == m_NormalPlayerSpeed)
 			{
-				if (player1.m_PlayerPosition[2] >= 10) player1.m_PlayerSpeed *= 2.f;
+				if (m_PlayerPosition[2] >= 10) m_PlayerSpeed *= 2.f;
 			}
-			else player1.m_PlayerSpeed = player1.m_NormalPlayerSpeed; //stop speeding
+			else m_PlayerSpeed = m_NormalPlayerSpeed; //stop speeding
 		}
 	}
 	void ProcessKeyUpEvent(const SDL_KeyboardEvent& e)
@@ -72,34 +72,22 @@ private:
 	const float m_MaxElapsedSeconds;
 
 	//Player
-	struct Player
-	{
-		ThreeBlade m_PlayerPosition;
-		float m_PlayerSize;
-		float m_NormalPlayerSpeed;
-		float m_PlayerSpeed{ m_NormalPlayerSpeed };
-		Color4f m_PlayerColor;
-		TwoBlade m_PlayerDirection;
-
-		Player() :
-			m_PlayerPosition{ 0,0,0 },
-			m_PlayerSize{ 20.f },
-			m_NormalPlayerSpeed{ 200.f },
-			m_PlayerSpeed{ m_NormalPlayerSpeed },
-			m_PlayerColor{ 1,1,1,1 },
-			m_PlayerDirection{ 1,1,0,0,0,0 }{}
-	};
-
-	Player player1{};
+	ThreeBlade m_PlayerPosition{ m_Window.width/2,m_Window.height/2,0 };
+	const float m_PlayerSize{ 20.f };
+	const float m_NormalPlayerSpeed{ 200.f };
+	float m_PlayerSpeed{ m_NormalPlayerSpeed };
+	Color4f m_PlayerColor{ 1,1,1,1 };
+	//player dimensions to be added
+	TwoBlade m_PlayerDirection{ 1,1,0,0,0,0 };
 
 	// FUNCTIONS
 	void InitializeGameEngine( );
 	void CleanupGameEngine( );
 
 	//Player functions
-	void DrawPlayer(Player p) const;
-	void TranslatePlayer(float deltaTime, Player p);
-	void CheckWindowCollision(Player p);
-	void VisualizeEnergy(Player p);
-	void ManageEnergySpeed(float deltaTime, Player p);
+	void DrawPlayer() const;
+	void TranslatePlayer(float deltaTime);
+	void CheckWindowCollision();
+	void VisualizeEnergy();
+	void ManageEnergySpeed(float deltaTime);
 };
