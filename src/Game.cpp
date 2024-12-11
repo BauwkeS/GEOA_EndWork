@@ -192,27 +192,49 @@ void Game::CleanupGameEngine()
 
 }
 
+void Game::DrawPlayer() const
+{
+	utils::SetColor(m_PlayerColor);
+	utils::FillRect(m_PlayerPosition[0], m_PlayerPosition[1], m_PlayerSize, m_PlayerSize);
+
+}
+
 void Game::TranslatePlayer(float deltaTime)
 {
 	//Constantly move your player around
-
-	//Variables of movement
-	float speed = 200.f * deltaTime;
-
-	Motor translateBasePosition{ Motor::Translation(speed,m_PlayerDirection) };
+	Motor translateBasePosition{ Motor::Translation(m_PlayerSpeed*deltaTime,m_PlayerDirection) };
 	m_PlayerPosition = (translateBasePosition * m_PlayerPosition * ~translateBasePosition).Grade3();
 }
 
 void Game::CheckWindowCollision()
 {
 	//Check the boundaries of the window to bounce the player back
-
 	if (m_PlayerPosition[0]+m_PlayerSize >= m_Window.width) m_PlayerDirection[0] = -1;//check right
 	else if (m_PlayerPosition[0] <= 0) m_PlayerDirection[0] = 1; //check left
 	else if (m_PlayerPosition[1]+m_PlayerSize >= m_Window.height) m_PlayerDirection[1] = -1;//check up
 	else if (m_PlayerPosition[1] <= 0) m_PlayerDirection[1] = 1; //check down
 }
 
+void Game::VisualizeEnergy()
+{
+	std::cout << m_PlayerPosition[2] << std::endl;
+}
+
+void Game::ManageEnergySpeed(float deltaTime)
+{
+	//Manage the energy in different situations
+	constexpr float energySpeed{ 40.f }; //how fast you get new energy
+
+	//if going OVER normal speed -> take energy OTHERWISE -> give energy
+	if (m_PlayerSpeed > m_NormalPlayerSpeed) m_PlayerPosition[2] -= deltaTime * energySpeed;
+	else m_PlayerPosition[2] += deltaTime * energySpeed;
+
+	//if you have 0 energy -> revert to normal speed
+	if (m_PlayerPosition[2] <= 0) m_PlayerSpeed = m_NormalPlayerSpeed;
+
+	//cap energy
+	if (m_PlayerPosition[2] >= 100) m_PlayerPosition[2] = 100;
+}
 void Game::Update(float elapsedSec)
 {
 	//---------TESTINGS
@@ -232,6 +254,8 @@ void Game::Update(float elapsedSec)
 
 	TranslatePlayer(elapsedSec);
 
+	ManageEnergySpeed(elapsedSec);
+	VisualizeEnergy();
 }
 
 void Game::Draw() const
@@ -240,35 +264,5 @@ void Game::Draw() const
 	glClearColor(0.f, 0.f, 0.f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-
-	MakeStuff();
-}
-
-void Game::MakeStuff() const
-{
-	
-
-
-	//test a 1 blade
-	/*OneBlade oneB1{ -1, 10, 10, 3 };
-	utils::SetColor(Color4f{ 1,1,1,1 });
-	utils::FillRect(oneB1[1],oneB1[2], 100, 100);*/
-
-	//test a 2 blade
-	/*TwoBlade twoB{ 100,200,300,0,0,0 };
-	utils::SetColor(Color4f{ 1,1,1,1 });
-	utils::FillRect(twoB[0],twoB[0], 100, 100);*/
-
-
-	//ThreeBlade threeB{ 200,400,0 };
-	//utils::SetColor(Color4f{ 1,1,1,1 });
-//	utils::FillRect(threeB[0], threeB[1], 20, 20);
-
-	//try testing translation
-	//auto translation = Motor::Translation(80, TwoBlade(1, 0, 0, 0, 0, 0));
-	//threeB = (translation* threeB * ~translation).Grade3();
-	//test
-	//paint your stuff
-	utils::SetColor(Color4f{ 1,1,1,1 });
-	utils::FillRect(m_PlayerPosition[0], m_PlayerPosition[1], m_PlayerSize, m_PlayerSize);
+	DrawPlayer();
 }

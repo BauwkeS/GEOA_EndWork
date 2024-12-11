@@ -21,12 +21,19 @@ public:
 
 	void Draw() const;
 
-	void MakeStuff() const;
-
 	// Event handling
 	void ProcessKeyDownEvent(const SDL_KeyboardEvent& e)
 	{
-
+		//when pressing S => enable or disable speed
+		if (e.keysym.sym == SDLK_s)
+		{
+			//start speeding if you have some energy
+			if(m_PlayerSpeed == m_NormalPlayerSpeed)
+			{
+				if (m_PlayerPosition[2] >= 10) m_PlayerSpeed *= 2.f;
+			}
+			else m_PlayerSpeed = m_NormalPlayerSpeed; //stop speeding
+		}
 	}
 	void ProcessKeyUpEvent(const SDL_KeyboardEvent& e)
 	{
@@ -67,6 +74,9 @@ private:
 	//Player
 	ThreeBlade m_PlayerPosition{ m_Window.width/2,m_Window.height/2,0 };
 	const float m_PlayerSize{ 20.f };
+	const float m_NormalPlayerSpeed{ 200.f };
+	float m_PlayerSpeed{ m_NormalPlayerSpeed };
+	Color4f m_PlayerColor{ 1,1,1,1 };
 	//player dimensions to be added
 	TwoBlade m_PlayerDirection{ 1,1,0,0,0,0 };
 
@@ -75,6 +85,9 @@ private:
 	void CleanupGameEngine( );
 
 	//Player functions
+	void DrawPlayer() const;
 	void TranslatePlayer(float deltaTime);
 	void CheckWindowCollision();
+	void VisualizeEnergy();
+	void ManageEnergySpeed(float deltaTime);
 };
