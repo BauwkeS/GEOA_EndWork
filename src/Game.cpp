@@ -196,7 +196,6 @@ void Game::DrawPlayer() const
 {
 	utils::SetColor(m_PlayerColor);
 	utils::FillRect(m_PlayerPosition[0], m_PlayerPosition[1], m_PlayerSize, m_PlayerSize);
-
 }
 
 void Game::TranslatePlayer(float deltaTime)
@@ -217,7 +216,15 @@ void Game::CheckWindowCollision()
 
 void Game::VisualizeEnergy()
 {
-	std::cout << m_PlayerPosition[2] << std::endl;
+	//Change color of the square depending on the amount of energy
+	float energyStatus = m_PlayerPosition[2];
+
+	m_PlayerColor =
+		Color4f{
+			(100.f-energyStatus)/100.f,
+			energyStatus/100.f,
+			0,
+			1};
 }
 
 void Game::ManageEnergySpeed(float deltaTime)
