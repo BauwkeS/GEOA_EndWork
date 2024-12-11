@@ -103,6 +103,7 @@ void Game::InitializeGameEngine()
 
 	//init own items
 	InitPillars();
+	PrintGameControls();
 
 	m_Initialized = true;
 }
@@ -195,6 +196,15 @@ void Game::CleanupGameEngine()
 
 }
 
+void Game::PrintGameControls()
+{
+	//print controls to use
+	std::cout << "-----GAME CONTROLS ------\n";
+	std::cout << "- S: Press to activate/Deactivate speed (only possible with enough energy\n";
+	std::cout << "- E: Switch selection to a random other pillar\n";
+	std::cout << "-------------------------\n";
+}
+
 void Game::DrawPlayer() const
 {
 	utils::SetColor(m_PlayerColor);
@@ -254,6 +264,12 @@ void Game::InitPillars()
 	pillar1.size = 30.f;
 	pillar1.isSelected = true;
 	m_PillarsVec.emplace_back(pillar1);
+
+	//pillar 2
+	pillar pillar2;
+	pillar2.position = ThreeBlade{ m_Window.width / 4 * 3,m_Window.height / 3 * 1,0 };
+	pillar2.size = 15.f;
+	m_PillarsVec.emplace_back(pillar2);
 
 	//assign colors to the pillars
 	ColorPillars();

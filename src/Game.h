@@ -84,6 +84,7 @@ private:
 	// FUNCTIONS
 	void InitializeGameEngine( );
 	void CleanupGameEngine( );
+	void PrintGameControls();
 
 	//Player functions
 	void DrawPlayer() const;
