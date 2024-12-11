@@ -204,7 +204,7 @@ void Game::Update(float elapsedSec)
 
 	Motor translator2{ Motor::Translation(400,TwoBlade(1, 1, 0, 0, 0, 0)) };
 	m_Position = (translator2 * m_Position * ~translator2).Grade3();
-
+	//test
 }
 
 void Game::Draw() const
