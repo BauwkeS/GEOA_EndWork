@@ -64,7 +64,8 @@ private:
 	// Prevent timing jumps when debugging
 	const float m_MaxElapsedSeconds;
 
-	ThreeBlade m_Position{ 200,200,0 };
+	//Player
+	ThreeBlade m_PlayerPosition{ m_Window.width/2,m_Window.height/2,0 };
 
 	// FUNCTIONS
 	void InitializeGameEngine( );
