@@ -66,8 +66,13 @@ private:
 
 	//Player
 	ThreeBlade m_PlayerPosition{ m_Window.width/2,m_Window.height/2,0 };
+	//player dimensions to be added
+
 
 	// FUNCTIONS
 	void InitializeGameEngine( );
 	void CleanupGameEngine( );
+
+	//Player functions
+	void TranslatePlayer(float deltaTime);
 };

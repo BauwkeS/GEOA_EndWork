@@ -192,8 +192,21 @@ void Game::CleanupGameEngine()
 
 }
 
+void Game::TranslatePlayer(float deltaTime)
+{
+	//Constantly move your player around
+
+	//Variables of movement
+	float speed = 80.f * deltaTime;
+	TwoBlade direction{ 1,0,0,0,0,0 };
+
+	Motor translateBasePosition{ Motor::Translation(speed,direction) };
+	m_PlayerPosition = (translateBasePosition * m_PlayerPosition * ~translateBasePosition).Grade3();
+}
+
 void Game::Update(float elapsedSec)
 {
+	//---------TESTINGS
 	//////translation
 	//Motor translator{ Motor::Translation(-400,TwoBlade(1, 1, 0, 0, 0, 0)) };
 	//m_Position = (translator * m_Position * ~translator).Grade3();
@@ -204,19 +217,25 @@ void Game::Update(float elapsedSec)
 
 	//Motor translator2{ Motor::Translation(400,TwoBlade(1, 1, 0, 0, 0, 0)) };
 	//m_Position = (translator2 * m_Position * ~translator2).Grade3();
-	////test
+	//----------
+	
+	TranslatePlayer(elapsedSec);
+
 }
 
 void Game::Draw() const
 {
+	//clear the screen
+	glClearColor(0.f, 0.f, 0.f, 1.f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+
 	MakeStuff();
 }
 
 void Game::MakeStuff() const
 {
-	//clear the screen
-	glClearColor(0.f,0.f,0.f,1.f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	
 
 
 	//test a 1 blade
