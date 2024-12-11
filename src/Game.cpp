@@ -197,11 +197,20 @@ void Game::TranslatePlayer(float deltaTime)
 	//Constantly move your player around
 
 	//Variables of movement
-	float speed = 80.f * deltaTime;
-	TwoBlade direction{ 1,0,0,0,0,0 };
+	float speed = 200.f * deltaTime;
 
-	Motor translateBasePosition{ Motor::Translation(speed,direction) };
+	Motor translateBasePosition{ Motor::Translation(speed,m_PlayerDirection) };
 	m_PlayerPosition = (translateBasePosition * m_PlayerPosition * ~translateBasePosition).Grade3();
+}
+
+void Game::CheckWindowCollision()
+{
+	//Check the boundaries of the window to bounce the player back
+
+	if (m_PlayerPosition[0]+m_PlayerSize >= m_Window.width) m_PlayerDirection[0] = -1;//check right
+	else if (m_PlayerPosition[0] <= 0) m_PlayerDirection[0] = 1; //check left
+	else if (m_PlayerPosition[1]+m_PlayerSize >= m_Window.height) m_PlayerDirection[1] = -1;//check up
+	else if (m_PlayerPosition[1] <= 0) m_PlayerDirection[1] = 1; //check down
 }
 
 void Game::Update(float elapsedSec)
@@ -218,7 +227,9 @@ void Game::Update(float elapsedSec)
 	//Motor translator2{ Motor::Translation(400,TwoBlade(1, 1, 0, 0, 0, 0)) };
 	//m_Position = (translator2 * m_Position * ~translator2).Grade3();
 	//----------
-	
+
+	CheckWindowCollision();
+
 	TranslatePlayer(elapsedSec);
 
 }
@@ -259,5 +270,5 @@ void Game::MakeStuff() const
 	//test
 	//paint your stuff
 	utils::SetColor(Color4f{ 1,1,1,1 });
-	utils::FillRect(m_PlayerPosition[0], m_PlayerPosition[1], 20, 20);
+	utils::FillRect(m_PlayerPosition[0], m_PlayerPosition[1], m_PlayerSize, m_PlayerSize);
 }

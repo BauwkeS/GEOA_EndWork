@@ -66,8 +66,9 @@ private:
 
 	//Player
 	ThreeBlade m_PlayerPosition{ m_Window.width/2,m_Window.height/2,0 };
+	const float m_PlayerSize{ 20.f };
 	//player dimensions to be added
-
+	TwoBlade m_PlayerDirection{ 1,1,0,0,0,0 };
 
 	// FUNCTIONS
 	void InitializeGameEngine( );
@@ -75,4 +76,5 @@ private:
 
 	//Player functions
 	void TranslatePlayer(float deltaTime);
+	void CheckWindowCollision();
 };
