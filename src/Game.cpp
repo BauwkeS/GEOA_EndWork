@@ -192,34 +192,34 @@ void Game::CleanupGameEngine()
 
 }
 
-void Game::DrawPlayer() const
+void Game::DrawPlayer(Player p) const
 {
-	utils::SetColor(m_PlayerColor);
-	utils::FillRect(m_PlayerPosition[0], m_PlayerPosition[1], m_PlayerSize, m_PlayerSize);
+	utils::SetColor(p.m_PlayerColor);
+	utils::FillRect(p.m_PlayerPosition[0], p.m_PlayerPosition[1], p.m_PlayerSize, p.m_PlayerSize);
 }
 
-void Game::TranslatePlayer(float deltaTime)
+void Game::TranslatePlayer(float deltaTime, Player p)
 {
 	//Constantly move your player around
-	Motor translateBasePosition{ Motor::Translation(m_PlayerSpeed*deltaTime,m_PlayerDirection) };
-	m_PlayerPosition = (translateBasePosition * m_PlayerPosition * ~translateBasePosition).Grade3();
+	Motor translateBasePosition{ Motor::Translation(p.m_PlayerSpeed*deltaTime,p.m_PlayerDirection) };
+	p.m_PlayerPosition = (translateBasePosition * p.m_PlayerPosition * ~translateBasePosition).Grade3();
 }
 
-void Game::CheckWindowCollision()
+void Game::CheckWindowCollision(Player p)
 {
 	//Check the boundaries of the window to bounce the player back
-	if (m_PlayerPosition[0]+m_PlayerSize >= m_Window.width) m_PlayerDirection[0] = -1;//check right
-	else if (m_PlayerPosition[0] <= 0) m_PlayerDirection[0] = 1; //check left
-	else if (m_PlayerPosition[1]+m_PlayerSize >= m_Window.height) m_PlayerDirection[1] = -1;//check up
-	else if (m_PlayerPosition[1] <= 0) m_PlayerDirection[1] = 1; //check down
+	if (p.m_PlayerPosition[0]+p.m_PlayerSize >= m_Window.width) p.m_PlayerDirection[0] = -1;//check right
+	else if (p.m_PlayerPosition[0] <= 0) p.m_PlayerDirection[0] = 1; //check left
+	else if (p.m_PlayerPosition[1]+p.m_PlayerSize >= m_Window.height) p.m_PlayerDirection[1] = -1;//check up
+	else if (p.m_PlayerPosition[1] <= 0) p.m_PlayerDirection[1] = 1; //check down
 }
 
-void Game::VisualizeEnergy()
+void Game::VisualizeEnergy(Player p)
 {
 	//Change color of the square depending on the amount of energy
-	float energyStatus = m_PlayerPosition[2];
+	float energyStatus = p.m_PlayerPosition[2];
 
-	m_PlayerColor =
+	p.m_PlayerColor =
 		Color4f{
 			(100.f-energyStatus)/100.f,
 			energyStatus/100.f,
@@ -227,20 +227,20 @@ void Game::VisualizeEnergy()
 			1};
 }
 
-void Game::ManageEnergySpeed(float deltaTime)
+void Game::ManageEnergySpeed(float deltaTime, Player p)
 {
 	//Manage the energy in different situations
 	constexpr float energySpeed{ 40.f }; //how fast you get new energy
 
 	//if going OVER normal speed -> take energy OTHERWISE -> give energy
-	if (m_PlayerSpeed > m_NormalPlayerSpeed) m_PlayerPosition[2] -= deltaTime * energySpeed;
-	else m_PlayerPosition[2] += deltaTime * energySpeed;
+	if (p.m_PlayerSpeed > p.m_NormalPlayerSpeed) p.m_PlayerPosition[2] -= deltaTime * energySpeed;
+	else p.m_PlayerPosition[2] += deltaTime * energySpeed;
 
 	//if you have 0 energy -> revert to normal speed
-	if (m_PlayerPosition[2] <= 0) m_PlayerSpeed = m_NormalPlayerSpeed;
+	if (p.m_PlayerPosition[2] <= 0) p.m_PlayerSpeed = p.m_NormalPlayerSpeed;
 
 	//cap energy
-	if (m_PlayerPosition[2] >= 100) m_PlayerPosition[2] = 100;
+	if (p.m_PlayerPosition[2] >= 100) p.m_PlayerPosition[2] = 100;
 }
 void Game::Update(float elapsedSec)
 {
@@ -257,12 +257,11 @@ void Game::Update(float elapsedSec)
 	//m_Position = (translator2 * m_Position * ~translator2).Grade3();
 	//----------
 
-	CheckWindowCollision();
-
-	TranslatePlayer(elapsedSec);
-
-	ManageEnergySpeed(elapsedSec);
-	VisualizeEnergy();
+	//player functions
+	CheckWindowCollision(player1);
+	TranslatePlayer(elapsedSec,player1);
+	ManageEnergySpeed(elapsedSec,player1);
+	VisualizeEnergy(player1);
 }
 
 void Game::Draw() const
@@ -271,5 +270,5 @@ void Game::Draw() const
 	glClearColor(0.f, 0.f, 0.f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	DrawPlayer();
+	DrawPlayer(player1);
 }
