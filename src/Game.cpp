@@ -292,7 +292,7 @@ void Game::ManageRotation(float deltaTime)
 		TwoBlade(m_PillarsVec[m_SelectedPillar].position[0], m_PillarsVec[m_SelectedPillar].position[1], 0, 0, 0, 0))};
 
 	//rotation
-	const float rotSpeed = 45.f*deltaTime;
+	const float rotSpeed = m_PlayerSpeed/3*deltaTime;
 	Motor rotation{ Motor::Rotation(rotSpeed,TwoBlade(0,0,0,0,0,m_PlayerDirection[5]))};
 
 	//full rotation & translation around the pillar
@@ -394,7 +394,6 @@ void Game::KeyboardRotatePillar(const SDL_KeyboardEvent& e)
 	if (e.keysym.sym == SDLK_r)
 	{
 		m_IsRotating = !m_IsRotating;
-		std::cout << "rotating is now: " << m_IsRotating << std::endl;
 	}
 }
 
@@ -427,6 +426,6 @@ void Game::Draw() const
 	glClearColor(0.f, 0.f, 0.f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	DrawPlayer();
 	DrawPillars();
+	DrawPlayer();
 }
