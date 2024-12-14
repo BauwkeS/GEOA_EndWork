@@ -399,32 +399,18 @@ void Game::KeyboardRotatePillar(const SDL_KeyboardEvent& e)
 
 void Game::KeyBoardMovePillar(const SDL_KeyboardEvent& e)
 {
-	//move the selected pillar with arrow functions -> also do a collision check
-	if ( e.keysym.sym == SDLK_UP)
+	if (e.keysym.sym == SDLK_UP || e.keysym.sym == SDLK_DOWN || e.keysym.sym == SDLK_RIGHT || e.keysym.sym == SDLK_LEFT)
 	{
-		//up
-		const Motor translator{ Motor::Translation(1,TwoBlade{0,1,0,0,0,0}) };
-		m_PillarsVec[m_SelectedPillar].position = (translator * m_PillarsVec[m_SelectedPillar].position * ~translator).Grade3();
-	}
-	if (e.keysym.sym == SDLK_DOWN)
-	{
-		//down
-		const Motor translator{ Motor::Translation(1,TwoBlade{0,-1,0,0,0,0}) };
-		m_PillarsVec[m_SelectedPillar].position = (translator * m_PillarsVec[m_SelectedPillar].position * ~translator).Grade3();
-	}
-	if (e.keysym.sym == SDLK_RIGHT)
-	{
-		//right
-		const Motor translator{ Motor::Translation(1,TwoBlade{1,0,0,0,0,0}) };
-		m_PillarsVec[m_SelectedPillar].position = (translator * m_PillarsVec[m_SelectedPillar].position * ~translator).Grade3();
-	}
-	if (e.keysym.sym == SDLK_LEFT)
-	{
-		//left
-		const Motor translator{ Motor::Translation(1,TwoBlade{-1,0,0,0,0,0}) };
-		m_PillarsVec[m_SelectedPillar].position = (translator * m_PillarsVec[m_SelectedPillar].position * ~translator).Grade3();
-	}
+		//move the selected pillar with arrow functions -> also do a collision check
+		float y{ 0 }, x{ 0 };
+		if (e.keysym.sym == SDLK_UP) y = 1; //up
+		if (e.keysym.sym == SDLK_DOWN) y = -1; //down
+		if (e.keysym.sym == SDLK_RIGHT) x = 1; //right
+		if (e.keysym.sym == SDLK_LEFT) x = -1; //left
 
+		Motor translation{ Motor::Translation(1,TwoBlade{x,y,0,0,0,0}) };
+		m_PillarsVec[m_SelectedPillar].position = (translation * m_PillarsVec[m_SelectedPillar].position * ~translation).Grade3();
+	}
 }
 
 void Game::Update(float elapsedSec)
