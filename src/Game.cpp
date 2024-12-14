@@ -203,7 +203,7 @@ void Game::PrintGameControls()
 {
 	//print controls to use
 	std::cout << "-----GAME CONTROLS ------\n";
-	std::cout << "- S: Press to activate/Deactivate speed (only possible with enough energy\n";
+	std::cout << "- S: Press to activate/Deactivate speed (only possible with enough energy)\n";
 	std::cout << "- E: Switch selection to a random other pillar\n";
 	std::cout << "- R: Rotate around the selected pillar\n";
 	std::cout << "-------------------------\n";
@@ -395,6 +395,36 @@ void Game::KeyboardRotatePillar(const SDL_KeyboardEvent& e)
 	{
 		m_IsRotating = !m_IsRotating;
 	}
+}
+
+void Game::KeyBoardMovePillar(const SDL_KeyboardEvent& e)
+{
+	//move the selected pillar with arrow functions -> also do a collision check
+	if ( e.keysym.sym == SDLK_UP)
+	{
+		//up
+		const Motor translator{ Motor::Translation(1,TwoBlade{0,1,0,0,0,0}) };
+		m_PillarsVec[m_SelectedPillar].position = (translator * m_PillarsVec[m_SelectedPillar].position * ~translator).Grade3();
+	}
+	if (e.keysym.sym == SDLK_DOWN)
+	{
+		//down
+		const Motor translator{ Motor::Translation(1,TwoBlade{0,-1,0,0,0,0}) };
+		m_PillarsVec[m_SelectedPillar].position = (translator * m_PillarsVec[m_SelectedPillar].position * ~translator).Grade3();
+	}
+	if (e.keysym.sym == SDLK_RIGHT)
+	{
+		//right
+		const Motor translator{ Motor::Translation(1,TwoBlade{1,0,0,0,0,0}) };
+		m_PillarsVec[m_SelectedPillar].position = (translator * m_PillarsVec[m_SelectedPillar].position * ~translator).Grade3();
+	}
+	if (e.keysym.sym == SDLK_LEFT)
+	{
+		//left
+		const Motor translator{ Motor::Translation(1,TwoBlade{-1,0,0,0,0,0}) };
+		m_PillarsVec[m_SelectedPillar].position = (translator * m_PillarsVec[m_SelectedPillar].position * ~translator).Grade3();
+	}
+
 }
 
 void Game::Update(float elapsedSec)

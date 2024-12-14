@@ -28,6 +28,7 @@ public:
 		KeyboardSpeed(e);
 		KeyboardPillar(e);
 		KeyboardRotatePillar(e);
+		KeyBoardMovePillar(e);
 	}
 	void ProcessKeyUpEvent(const SDL_KeyboardEvent& e)
 	{
@@ -112,4 +113,5 @@ private:
 	void KeyboardSpeed(const SDL_KeyboardEvent& e);
 	void KeyboardPillar(const SDL_KeyboardEvent& e);
 	void KeyboardRotatePillar(const SDL_KeyboardEvent& e);
+	void KeyBoardMovePillar(const SDL_KeyboardEvent& e);
 };
