@@ -27,6 +27,7 @@ public:
 	{
 		KeyboardSpeed(e);
 		KeyboardPillar(e);
+		KeyboardRotatePillar(e);
 	}
 	void ProcessKeyUpEvent(const SDL_KeyboardEvent& e)
 	{
@@ -72,6 +73,7 @@ private:
 	Color4f m_PlayerColor{ 1,1,1,1 };
 	//player dimensions to be added
 	TwoBlade m_PlayerDirection{ 1,1,0,0,0,0 };
+	bool m_IsRotating{ false };
 
 	// FUNCTIONS
 	void InitializeGameEngine( );
@@ -82,9 +84,10 @@ private:
 	void DrawPlayer() const;
 	void TranslatePlayer(float deltaTime);
 	void CheckWindowCollision();
+	void CheckGameCollision();
 	void VisualizeEnergy();
 	void ManageEnergySpeed(float deltaTime);
-
+	void ManageRotation(float deltaTime);
 
 	//Pillar
 	struct pillar
@@ -96,6 +99,7 @@ private:
 	};
 
 	std::vector<pillar> m_PillarsVec{};
+	int m_SelectedPillar{};
 
 	//pillar functions
 	void InitPillars();
@@ -106,4 +110,5 @@ private:
 	//Keyboard functions
 	void KeyboardSpeed(const SDL_KeyboardEvent& e);
 	void KeyboardPillar(const SDL_KeyboardEvent& e);
+	void KeyboardRotatePillar(const SDL_KeyboardEvent& e);
 };

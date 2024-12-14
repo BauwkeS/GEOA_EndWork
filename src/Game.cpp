@@ -205,6 +205,7 @@ void Game::PrintGameControls()
 	std::cout << "-----GAME CONTROLS ------\n";
 	std::cout << "- S: Press to activate/Deactivate speed (only possible with enough energy\n";
 	std::cout << "- E: Switch selection to a random other pillar\n";
+	std::cout << "- R: Rotate around the selected pillar\n";
 	std::cout << "-------------------------\n";
 }
 
@@ -228,6 +229,14 @@ void Game::CheckWindowCollision()
 	else if (m_PlayerPosition[0] <= 0) m_PlayerDirection[0] = 1; //check left
 	else if (m_PlayerPosition[1]+m_PlayerSize >= m_Window.height) m_PlayerDirection[1] = -1;//check up
 	else if (m_PlayerPosition[1] <= 0) m_PlayerDirection[1] = 1; //check down
+}
+
+void Game::CheckGameCollision()
+{
+	//check collision with other game objects
+
+	//enemy?
+	
 }
 
 void Game::VisualizeEnergy()
@@ -259,6 +268,49 @@ void Game::ManageEnergySpeed(float deltaTime)
 	if (m_PlayerPosition[2] >= 100) m_PlayerPosition[2] = 100;
 }
 
+void Game::ManageRotation(float deltaTime)
+{
+	//rotate around the selected Pillar
+	if(m_IsRotating)
+	{
+		ThreeBlade localPos = m_PlayerPosition;
+		//translation to origin
+		Motor translator{ Motor::Translation(m_PillarsVec[m_SelectedPillar].position.VNorm(),TwoBlade(m_PillarsVec[m_SelectedPillar].position[0], m_PillarsVec[m_SelectedPillar].position[1], 0, 0, 0, 0))};
+		//m_PlayerPosition = (translator1 * m_PlayerPosition * ~translator1).Grade3();
+		//Motor translator2{ Motor::Translation(-m_PlayerPosition[1],TwoBlade(0, 1, 0, 0, 0, 0)) };
+		//m_PlayerPosition = (translator2 * m_PlayerPosition * ~translator2).Grade3();
+
+		//rotation
+		const float rotSpeed = 45.f*deltaTime;
+		Motor rotation{ Motor::Rotation(rotSpeed,TwoBlade(0,0,0,0,0,-1)) };
+		//m_PlayerPosition = (rotation * m_PlayerPosition * ~rotation).Grade3();
+
+		Motor rotTranslations{ translator * rotation * ~translator };
+
+		m_PlayerPosition = (rotTranslations * m_PlayerPosition * ~rotTranslations).Grade3();
+
+		//translate back
+		//Motor translator3{ Motor::Translation(localPos[0],TwoBlade(1, 0, 0, 0, 0, 0)) };
+		//m_PlayerPosition = (translator3 * m_PlayerPosition * ~translator3).Grade3();
+		//Motor translator4{ Motor::Translation(localPos[1],TwoBlade(0, 1, 0, 0, 0, 0)) };
+		//m_PlayerPosition = (translator4 * m_PlayerPosition * ~translator4).Grade3();
+
+
+		
+	}	
+
+	//////translation
+	//Motor translator{ Motor::Translation(-400,TwoBlade(1, 1, 0, 0, 0, 0)) };
+	//m_Position = (translator * m_Position * ~translator).Grade3();
+
+	////rotation
+	//Motor rotation{ Motor::Rotation(-45*elapsedSec,TwoBlade(0, 0, 0 ,0,0,1)) };
+	//m_Position = (rotation * m_Position * ~rotation).Grade3();
+
+	//Motor translator2{ Motor::Translation(400,TwoBlade(1, 1, 0, 0, 0, 0)) };
+	//m_Position = (translator2 * m_Position * ~translator2).Grade3();
+}
+
 void Game::InitPillars()
 {
 	//pillar 1
@@ -276,6 +328,7 @@ void Game::InitPillars()
 	m_PillarsVec.emplace_back(pillar2);
 
 	//assign colors to the pillars
+	m_SelectedPillar = 0;
 	ColorPillars();
 }
 
@@ -316,33 +369,37 @@ void Game::KeyboardSpeed(const SDL_KeyboardEvent& e)
 void Game::KeyboardPillar(const SDL_KeyboardEvent& e)
 {
 	//when pressing E => switch to another pillar
-	int activePillarIndex{};
-	int newActivePillarIndex{};
-
-	//search for active pillar
-	for (int i = 0; i < static_cast<int>(m_PillarsVec.size()); ++i)
+	if (e.keysym.sym == SDLK_e)
 	{
-		//local store the ID of the active pillar
-		if (m_PillarsVec[i].isSelected) activePillarIndex = i;
+		int newActivePillarIndex{};
+
+		//search for another pillar that is not the active one
+		do
+		{
+			newActivePillarIndex = rand() % static_cast<int>(m_PillarsVec.size());
+		} while (newActivePillarIndex == m_SelectedPillar);
+
+		//make every pillar BUT the new one deselected
+		for (int i = 0; i < m_PillarsVec.size(); ++i)
+		{
+			if (i != newActivePillarIndex) m_PillarsVec[i].isSelected = false;
+			else m_PillarsVec[i].isSelected = true;
+		}
+
+		m_SelectedPillar = newActivePillarIndex;
+
+		//change colors
+		ColorPillars();
 	}
-	std::cout << "active pillar is: " << activePillarIndex << std::endl;
-	//search for another pillar that is not the active one
-	do
-	{
-		newActivePillarIndex = rand() % static_cast<int>(m_PillarsVec.size());
-	} while (newActivePillarIndex == activePillarIndex);
+}
 
-	std::cout << "new pillar is: " << newActivePillarIndex << std::endl;
-
-	//make every pillar BUT the new one deselected
-	for (int i = 0; i < m_PillarsVec.size(); ++i)
+void Game::KeyboardRotatePillar(const SDL_KeyboardEvent& e)
+{
+	if (e.keysym.sym == SDLK_r)
 	{
-		if (i != newActivePillarIndex) m_PillarsVec[i].isSelected = false;
-		else m_PillarsVec[i].isSelected = true;
+		m_IsRotating = !m_IsRotating;
+		std::cout << "rotating is now: " << m_IsRotating << std::endl;
 	}
-
-	//change colors
-	ColorPillars();
 }
 
 void Game::Update(float elapsedSec)
@@ -362,7 +419,9 @@ void Game::Update(float elapsedSec)
 
 	CheckWindowCollision();
 
-	TranslatePlayer(elapsedSec);
+	//TranslatePlayer(elapsedSec);
+
+	ManageRotation(elapsedSec);
 
 	ManageEnergySpeed(elapsedSec);
 	VisualizeEnergy();
