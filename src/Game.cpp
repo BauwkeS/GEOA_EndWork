@@ -224,11 +224,26 @@ void Game::TranslatePlayer(float deltaTime)
 
 void Game::CheckWindowCollision()
 {
-	//Check the boundaries of the window to bounce the player back
-	if (m_PlayerPosition[0]+m_PlayerSize >= m_Window.width) m_PlayerDirection[0] = -1;//check right
-	else if (m_PlayerPosition[0] <= 0) m_PlayerDirection[0] = 1; //check left
-	else if (m_PlayerPosition[1]+m_PlayerSize >= m_Window.height) m_PlayerDirection[1] = -1;//check up
-	else if (m_PlayerPosition[1] <= 0) m_PlayerDirection[1] = 1; //check down
+	//rotation
+	if (m_IsRotating)
+	{
+		if (m_PlayerPosition[0] + m_PlayerSize >= m_Window.width ||
+		m_PlayerPosition[0] <= 0 ||
+		m_PlayerPosition[1] + m_PlayerSize >= m_Window.height ||
+		m_PlayerPosition[1] <= 0)
+		{
+			if (m_PlayerDirection[5] <= -1.f) m_PlayerDirection[5] = 1.f;
+			else m_PlayerDirection[5] = -1.f;
+		}
+	}
+	else
+	{
+		//Check the boundaries of the window to bounce the player back
+		if (m_PlayerPosition[0] + m_PlayerSize >= m_Window.width) m_PlayerDirection[0] = -1;//check right
+		else if (m_PlayerPosition[0] <= 0) m_PlayerDirection[0] = 1; //check left
+		else if (m_PlayerPosition[1] + m_PlayerSize >= m_Window.height) m_PlayerDirection[1] = -1;//check up
+		else if (m_PlayerPosition[1] <= 0) m_PlayerDirection[1] = 1; //check down
+	}
 }
 
 void Game::CheckGameCollision()
@@ -271,20 +286,25 @@ void Game::ManageEnergySpeed(float deltaTime)
 void Game::ManageRotation(float deltaTime)
 {
 	//rotate around the selected Pillar
-	if(m_IsRotating)
-	{
-		//translation to the selected pillar
-		Motor translator{ Motor::Translation(m_PillarsVec[m_SelectedPillar].position.VNorm(),
-			TwoBlade(m_PillarsVec[m_SelectedPillar].position[0], m_PillarsVec[m_SelectedPillar].position[1], 0, 0, 0, 0))};
 
-		//rotation
-		const float rotSpeed = 45.f*deltaTime;
-		Motor rotation{ Motor::Rotation(rotSpeed,TwoBlade(0,0,0,0,0,-1)) };
+	//translation to the selected pillar
+	Motor translator{ Motor::Translation(m_PillarsVec[m_SelectedPillar].position.VNorm(),
+		TwoBlade(m_PillarsVec[m_SelectedPillar].position[0], m_PillarsVec[m_SelectedPillar].position[1], 0, 0, 0, 0))};
 
-		//full rotation & translation around the pillar
-		Motor rotTranslations{ translator * rotation * ~translator };
-		m_PlayerPosition = (rotTranslations * m_PlayerPosition * ~rotTranslations).Grade3();		
-	}	
+	//rotation
+	const float rotSpeed = 45.f*deltaTime;
+	Motor rotation{ Motor::Rotation(rotSpeed,TwoBlade(0,0,0,0,0,m_PlayerDirection[5]))};
+
+	//full rotation & translation around the pillar
+	Motor rotTranslations{ translator * rotation * ~translator };
+	m_PlayerPosition = (rotTranslations * m_PlayerPosition * ~rotTranslations).Grade3();		
+		
+}
+
+void Game::MovePlayer(float deltaTime)
+{
+	if (m_IsRotating) ManageRotation(deltaTime);
+	else TranslatePlayer(deltaTime);
 }
 
 void Game::InitPillars()
@@ -395,9 +415,7 @@ void Game::Update(float elapsedSec)
 
 	CheckWindowCollision();
 
-	//TranslatePlayer(elapsedSec);
-
-	ManageRotation(elapsedSec);
+	MovePlayer(elapsedSec);
 
 	ManageEnergySpeed(elapsedSec);
 	VisualizeEnergy();
