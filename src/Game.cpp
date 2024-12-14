@@ -273,42 +273,18 @@ void Game::ManageRotation(float deltaTime)
 	//rotate around the selected Pillar
 	if(m_IsRotating)
 	{
-		ThreeBlade localPos = m_PlayerPosition;
-		//translation to origin
-		Motor translator{ Motor::Translation(m_PillarsVec[m_SelectedPillar].position.VNorm(),TwoBlade(m_PillarsVec[m_SelectedPillar].position[0], m_PillarsVec[m_SelectedPillar].position[1], 0, 0, 0, 0))};
-		//m_PlayerPosition = (translator1 * m_PlayerPosition * ~translator1).Grade3();
-		//Motor translator2{ Motor::Translation(-m_PlayerPosition[1],TwoBlade(0, 1, 0, 0, 0, 0)) };
-		//m_PlayerPosition = (translator2 * m_PlayerPosition * ~translator2).Grade3();
+		//translation to the selected pillar
+		Motor translator{ Motor::Translation(m_PillarsVec[m_SelectedPillar].position.VNorm(),
+			TwoBlade(m_PillarsVec[m_SelectedPillar].position[0], m_PillarsVec[m_SelectedPillar].position[1], 0, 0, 0, 0))};
 
 		//rotation
 		const float rotSpeed = 45.f*deltaTime;
 		Motor rotation{ Motor::Rotation(rotSpeed,TwoBlade(0,0,0,0,0,-1)) };
-		//m_PlayerPosition = (rotation * m_PlayerPosition * ~rotation).Grade3();
 
+		//full rotation & translation around the pillar
 		Motor rotTranslations{ translator * rotation * ~translator };
-
-		m_PlayerPosition = (rotTranslations * m_PlayerPosition * ~rotTranslations).Grade3();
-
-		//translate back
-		//Motor translator3{ Motor::Translation(localPos[0],TwoBlade(1, 0, 0, 0, 0, 0)) };
-		//m_PlayerPosition = (translator3 * m_PlayerPosition * ~translator3).Grade3();
-		//Motor translator4{ Motor::Translation(localPos[1],TwoBlade(0, 1, 0, 0, 0, 0)) };
-		//m_PlayerPosition = (translator4 * m_PlayerPosition * ~translator4).Grade3();
-
-
-		
+		m_PlayerPosition = (rotTranslations * m_PlayerPosition * ~rotTranslations).Grade3();		
 	}	
-
-	//////translation
-	//Motor translator{ Motor::Translation(-400,TwoBlade(1, 1, 0, 0, 0, 0)) };
-	//m_Position = (translator * m_Position * ~translator).Grade3();
-
-	////rotation
-	//Motor rotation{ Motor::Rotation(-45*elapsedSec,TwoBlade(0, 0, 0 ,0,0,1)) };
-	//m_Position = (rotation * m_Position * ~rotation).Grade3();
-
-	//Motor translator2{ Motor::Translation(400,TwoBlade(1, 1, 0, 0, 0, 0)) };
-	//m_Position = (translator2 * m_Position * ~translator2).Grade3();
 }
 
 void Game::InitPillars()
