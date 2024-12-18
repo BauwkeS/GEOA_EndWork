@@ -29,6 +29,7 @@ public:
 		KeyboardPillar(e);
 		KeyboardRotatePillar(e);
 		KeyBoardMovePillar(e);
+		KeyBoardReflectPlayer(e);
 	}
 	void ProcessKeyUpEvent(const SDL_KeyboardEvent& e)
 	{
@@ -90,6 +91,13 @@ private:
 	void ManageEnergySpeed(float deltaTime);
 	void ManageRotation(float deltaTime);
 	void MovePlayer(float deltaTime);
+	void ReflectPlayer();
+
+	//Window boundaries
+	OneBlade m_LeftWindow{ 1,0,0,0 };
+	OneBlade m_RightWindow{ 0,1,0,0 };
+	OneBlade m_DownWindow{ 0,0,1,0 };
+	OneBlade m_UpWindow{ 0,0,0,1 };
 
 	//Pillar
 	struct pillar
@@ -114,4 +122,5 @@ private:
 	void KeyboardPillar(const SDL_KeyboardEvent& e);
 	void KeyboardRotatePillar(const SDL_KeyboardEvent& e);
 	void KeyBoardMovePillar(const SDL_KeyboardEvent& e);
+	void KeyBoardReflectPlayer(const SDL_KeyboardEvent& e);
 };

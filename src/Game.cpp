@@ -203,9 +203,11 @@ void Game::PrintGameControls()
 {
 	//print controls to use
 	std::cout << "-----GAME CONTROLS ------\n";
-	std::cout << "- S: Press to activate/Deactivate speed (only possible with enough energy)\n";
+	std::cout << "- S: Press to activate/Deactivate speed up (only possible with enough energy)\n";
 	std::cout << "- E: Switch selection to a random other pillar\n";
 	std::cout << "- R: Rotate around the selected pillar\n";
+	std::cout << "- W: Reflect around the selected pillar\n";
+	std::cout << "- Arrow keys: Move the selected pillar\n";
 	std::cout << "-------------------------\n";
 }
 
@@ -244,6 +246,14 @@ void Game::CheckWindowCollision()
 		else if (m_PlayerPosition[1] + m_PlayerSize >= m_Window.height) m_PlayerDirection[1] = -1;//check up
 		else if (m_PlayerPosition[1] <= 0) m_PlayerDirection[1] = 1; //check down
 	}
+
+	//make a plane on all sized
+	//take the motor of the movement that is going off screen
+	//calc the distance to the plane from the point
+	//if you have a collision then reflext your line on the plane
+	//P join m gives the disance bewen outb abd olane and check if thats less than what you need and then reflect what yu meed
+	//create a ve tor of all collision planes and for loop over them 
+
 }
 
 void Game::CheckGameCollision()
@@ -303,6 +313,23 @@ void Game::MovePlayer(float deltaTime)
 {
 	if (m_IsRotating) ManageRotation(deltaTime);
 	else TranslatePlayer(deltaTime);
+}
+
+void Game::ReflectPlayer()
+{
+	//distance
+	//try to - the 2 distances to get it and get the distance between 2 points to reflect that
+
+	//translation to the selected pillar
+	//Motor translator{ Motor::Translation(m_PillarsVec[m_SelectedPillar].position.VNorm(),
+	//	TwoBlade(m_PillarsVec[m_SelectedPillar].position[0], m_PillarsVec[m_SelectedPillar].position[1], 0, 0, 0, 0)) };
+
+	//std::cout << "Player was at: x[" << m_PlayerPosition[0] << "], y[" << m_PlayerPosition[1] << "]\n";
+	//full reflection around the pillar
+	m_PlayerPosition = (m_PillarsVec[m_SelectedPillar].position * m_PlayerPosition * ~m_PillarsVec[m_SelectedPillar].position).Grade3();
+	//std::cout << "Player is NOW at: x[" << m_PlayerPosition[0] << "], y[" << m_PlayerPosition[1] << "]\n";
+
+	//check if the distance is away from 
 }
 
 void Game::InitPillars()
@@ -408,6 +435,14 @@ void Game::KeyBoardMovePillar(const SDL_KeyboardEvent& e)
 
 		Motor translation{ Motor::Translation(1,TwoBlade{x,y,0,0,0,0}) };
 		m_PillarsVec[m_SelectedPillar].position = (translation * m_PillarsVec[m_SelectedPillar].position * ~translation).Grade3();
+	}
+}
+
+void Game::KeyBoardReflectPlayer(const SDL_KeyboardEvent& e)
+{
+	if (e.keysym.sym == SDLK_w)
+	{
+		ReflectPlayer();
 	}
 }
 
