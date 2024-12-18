@@ -257,12 +257,10 @@ void Game::CheckGameCollision()
 void Game::VisualizeEnergy()
 {
 	//Change color of the square depending on the amount of energy
-	float energyStatus = m_PlayerPosition[2];
-
 	m_PlayerColor =
 		Color4f{
-			(100.f-energyStatus)/100.f,
-			energyStatus/100.f,
+			(100.f- m_PlayerPosition[2])/100.f,
+			m_PlayerPosition[2] /100.f,
 			0,
 			1};
 }
