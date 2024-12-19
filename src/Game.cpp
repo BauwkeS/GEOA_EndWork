@@ -326,24 +326,31 @@ void Game::ReflectPlayer()
 
 	//std::cout << "Player was at: x[" << m_PlayerPosition[0] << "], y[" << m_PlayerPosition[1] << "]\n";
 	//full reflection around the pillar
+	auto powerLevel = m_PlayerPosition[2];
 	m_PlayerPosition = (m_PillarsVec[m_SelectedPillar].position * m_PlayerPosition * ~m_PillarsVec[m_SelectedPillar].position).Grade3();
+	m_PlayerPosition[2] = powerLevel;
 	//std::cout << "Player is NOW at: x[" << m_PlayerPosition[0] << "], y[" << m_PlayerPosition[1] << "]\n";
 
-	//check if the distance is away from 
+	//check if the distance is away from the main screen, if so put it at the most far away point
+	if (m_PlayerPosition[0] - m_PlayerSize >= m_Window.width) m_PlayerPosition[0] = m_Window.width - m_PlayerSize;
+	else if (m_PlayerPosition[0] <= 0) m_PlayerPosition[0] = 0;
+	else if (m_PlayerPosition[1] + m_PlayerSize >= m_Window.height) m_PlayerPosition[1] = m_Window.height - m_PlayerSize;
+	else if (m_PlayerPosition[1] <= 0) m_PlayerPosition[1] = 0;
+
 }
 
 void Game::InitPillars()
 {
 	//pillar 1
 	pillar pillar1;
-	pillar1.position = ThreeBlade{ m_Window.width / 4 * 1,m_Window.height / 3 * 2,0 };
+	pillar1.position = ThreeBlade{ m_Window.width / 4 * 1,m_Window.height / 3 * 2,1 };
 	pillar1.size = 30.f;
 	pillar1.isSelected = true;
 	m_PillarsVec.emplace_back(pillar1);
 
 	//pillar 2
 	pillar pillar2;
-	pillar2.position = ThreeBlade{ m_Window.width / 4 * 3,m_Window.height / 3 * 1,0 };
+	pillar2.position = ThreeBlade{ m_Window.width / 4 * 3,m_Window.height / 3 * 1,1 };
 	pillar2.size = 15.f;
 	pillar2.isSelected = false;
 	m_PillarsVec.emplace_back(pillar2);
