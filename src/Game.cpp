@@ -455,19 +455,6 @@ void Game::KeyBoardReflectPlayer(const SDL_KeyboardEvent& e)
 
 void Game::Update(float elapsedSec)
 {
-	//---------TESTINGS
-	//////translation
-	//Motor translator{ Motor::Translation(-400,TwoBlade(1, 1, 0, 0, 0, 0)) };
-	//m_Position = (translator * m_Position * ~translator).Grade3();
-
-	////rotation
-	//Motor rotation{ Motor::Rotation(-45*elapsedSec,TwoBlade(0, 0, 0 ,0,0,1)) };
-	//m_Position = (rotation * m_Position * ~rotation).Grade3();
-
-	//Motor translator2{ Motor::Translation(400,TwoBlade(1, 1, 0, 0, 0, 0)) };
-	//m_Position = (translator2 * m_Position * ~translator2).Grade3();
-	//----------
-
 	CheckWindowCollision();
 
 	MovePlayer(elapsedSec);
