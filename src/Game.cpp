@@ -219,10 +219,13 @@ void Game::DrawPlayer() const
 
 void Game::TranslatePlayer(float deltaTime)
 {
-	//std::cout << m_PlayerDirection.Grade2() << std::endl;
+	///std::cout << m_PlayerPosition << std::endl;
+	std::cout << "m_PlayerDirection: " << m_PlayerDirection << std::endl;
+	m_PlayerMotor = Motor::Translation(m_PlayerSpeed*deltaTime,m_PlayerDirection);
+	std::cout << "m_PlayerDirectionAAAAAAA: " << m_PlayerDirection << std::endl;
 	//Constantly move your player around
-	Motor translateBasePosition{ Motor::Translation(m_PlayerSpeed*deltaTime,m_PlayerDirection.Grade2()) };
-	m_PlayerPosition = (translateBasePosition * m_PlayerPosition * ~translateBasePosition).Grade3();
+	//m_PlayerDirection[0] = m_PlayerSpeed * deltaTime;
+	m_PlayerPosition = (m_PlayerMotor * m_PlayerPosition * ~m_PlayerMotor).Grade3();
 }
 
 void Game::CheckWindowCollision()
@@ -267,7 +270,7 @@ void Game::CheckWindowCollision()
 		//m_Mover = (m_LeftBorder * m_Mover * ~m_LeftBorder).ToMotor();
 	//std::cout << "m_PlayerDirection ???:  " << m_PlayerDirection << std::endl;
 		//std::cout << "RIIIIIIIIIIIIIIIIIIGHT\n";
-		m_PlayerDirection = (m_RightWindow * m_PlayerDirection * ~m_RightWindow).ToMotor();
+		m_PlayerMotor = (m_RightWindow * m_PlayerMotor * ~m_RightWindow).ToMotor();
 	//std::cout << "m_PlayerDirection ???AAAAAAAAAAAAAAA:  " << m_PlayerDirection << std::endl;
 
 	}
@@ -275,22 +278,26 @@ void Game::CheckWindowCollision()
 	{
 		//m_Mover = (m_LeftBorder * m_Mover * ~m_LeftBorder).ToMotor();
 		//std::cout << "LEEEEEEEEEEEEEEEEEEEEEEEFT\n";
-		m_PlayerDirection = (m_LeftWindow * m_PlayerDirection * ~m_LeftWindow).ToMotor();
+		m_PlayerMotor = (m_LeftWindow * m_PlayerMotor * ~m_LeftWindow).ToMotor();
 	}
 	if (abs(m_UpWindow & m_PlayerPosition) < m_PlayerSize)
 	{
 		//m_Mover = (m_LeftBorder * m_Mover * ~m_LeftBorder).ToMotor();
 	//std::cout << "m_PlayerDirection ???:  " << m_PlayerDirection << std::endl;
 		//std::cout << "UPPPPPPPPPP\n";
-		m_PlayerDirection = (m_UpWindow * m_PlayerDirection * ~m_UpWindow).ToMotor();
+		m_PlayerMotor = (m_UpWindow * m_PlayerMotor * ~m_UpWindow).ToMotor();
 	//std::cout << "m_PlayerDirection ???AAAAAAAAAAAAAAA:  " << m_PlayerDirection << std::endl;
 	}
 	if (abs(m_DownWindow & m_PlayerPosition) < 1)
 	{
 		//m_Mover = (m_LeftBorder * m_Mover * ~m_LeftBorder).ToMotor();
-		m_PlayerDirection = (m_DownWindow * m_PlayerDirection * ~m_DownWindow).ToMotor();
+		m_PlayerMotor = (m_DownWindow * m_PlayerMotor * ~m_DownWindow).ToMotor();
 		//std::cout << "DOWNNNNNNNNNNNNNNNN\n";
 	}
+
+	//update dir
+	m_PlayerDirection = m_PlayerMotor.Grade2();
+
 	m_PlayerPosition[2] = powerLevel; //restore power level
 }
 

@@ -74,10 +74,11 @@ private:
 	float m_PlayerSpeed{ m_NormalPlayerSpeed };
 	Color4f m_PlayerColor{ 1,1,1,1 };
 	//player dimensions to be added
-	Motor m_PlayerDirection{ Motor::Translation(m_PlayerSpeed,TwoBlade{1,-1,0,0,0,-1 }) };
+	TwoBlade m_PlayerDirection {1,-1,0,0,0,-1 };
+	Motor m_PlayerMotor{ Motor::Translation(m_PlayerSpeed,m_PlayerDirection) };
 	bool m_IsRotating{ false };
 
-	// FUNCTIONS
+	// FUNCTIONSWW
 	void InitializeGameEngine( );
 	void CleanupGameEngine( );
 	void PrintGameControls();
