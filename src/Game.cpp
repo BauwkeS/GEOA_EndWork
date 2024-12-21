@@ -219,33 +219,34 @@ void Game::DrawPlayer() const
 
 void Game::TranslatePlayer(float deltaTime)
 {
+	//std::cout << m_PlayerDirection.Grade2() << std::endl;
 	//Constantly move your player around
-	Motor translateBasePosition{ Motor::Translation(m_PlayerSpeed*deltaTime,m_PlayerDirection) };
+	Motor translateBasePosition{ Motor::Translation(m_PlayerSpeed*deltaTime,m_PlayerDirection.Grade2()) };
 	m_PlayerPosition = (translateBasePosition * m_PlayerPosition * ~translateBasePosition).Grade3();
 }
 
 void Game::CheckWindowCollision()
 {
 	//rotation
-	if (m_IsRotating)
-	{
-		if (m_PlayerPosition[0] + m_PlayerSize >= m_Window.width ||
-		m_PlayerPosition[0] <= 0 ||
-		m_PlayerPosition[1] + m_PlayerSize >= m_Window.height ||
-		m_PlayerPosition[1] <= 0)
-		{
-			if (m_PlayerDirection[5] <= -1.f) m_PlayerDirection[5] = 1.f;
-			else m_PlayerDirection[5] = -1.f;
-		}
-	}
-	else
-	{
-		//Check the boundaries of the window to bounce the player back
-		if (m_PlayerPosition[0] + m_PlayerSize >= m_Window.width) m_PlayerDirection[0] = -1;//check right
-		else if (m_PlayerPosition[0] <= 0) m_PlayerDirection[0] = 1; //check left
-		else if (m_PlayerPosition[1] + m_PlayerSize >= m_Window.height) m_PlayerDirection[1] = -1;//check up
-		else if (m_PlayerPosition[1] <= 0) m_PlayerDirection[1] = 1; //check down
-	}
+	//if (m_IsRotating)
+	//{
+	//	if (m_PlayerPosition[0] + m_PlayerSize >= m_Window.width ||
+	//	m_PlayerPosition[0] <= 0 ||
+	//	m_PlayerPosition[1] + m_PlayerSize >= m_Window.height ||
+	//	m_PlayerPosition[1] <= 0)
+	//	{
+	//		if (m_PlayerDirection[5] <= -1.f) m_PlayerDirection[5] = 1.f;
+	//		else m_PlayerDirection[5] = -1.f;
+	//	}
+	//}
+	//else
+	//{
+	//	//Check the boundaries of the window to bounce the player back
+	//	if (m_PlayerPosition[1] + m_PlayerSize >= m_Window.width) m_PlayerDirection[1] = -1;//check right
+	//	else if (m_PlayerPosition[1] <= 0) m_PlayerDirection[1] = 1; //check left
+	//	else if (m_PlayerPosition[2] + m_PlayerSize >= m_Window.height) m_PlayerDirection[2] = -1;//check up
+	//	else if (m_PlayerPosition[2] <= 0) m_PlayerDirection[2] = 1; //check down
+	//}
 
 	//make a plane on all sized
 	//take the motor of the movement that is going off screen
@@ -254,6 +255,43 @@ void Game::CheckWindowCollision()
 	//P join m gives the disance bewen outb abd olane and check if thats less than what you need and then reflect what yu meed
 	//create a ve tor of all collision planes and for loop over them 
 
+	//check if there is no distance between the player and the walls -> if not then reflect
+
+	auto powerLevel = m_PlayerPosition[2]; //store power level
+	//m_PlayerPosition = (m_PillarsVec[m_SelectedPillar].position * m_PlayerPosition * ~m_PillarsVec[m_SelectedPillar].position).Grade3();
+	//std::cout << "m_RightWindow ???:  " << m_RightWindow << std::endl;
+	//std::cout << "m_LeftWindow ???:  " << m_LeftWindow << std::endl;
+	//std::cout << "m_RightWindow & m_PlayerPosition???:  " << abs(m_LeftWindow & m_PlayerPosition) << std::endl;
+	if (abs(m_RightWindow & m_PlayerPosition) < m_PlayerSize)
+	{
+		//m_Mover = (m_LeftBorder * m_Mover * ~m_LeftBorder).ToMotor();
+	//std::cout << "m_PlayerDirection ???:  " << m_PlayerDirection << std::endl;
+		//std::cout << "RIIIIIIIIIIIIIIIIIIGHT\n";
+		m_PlayerDirection = (m_RightWindow * m_PlayerDirection * ~m_RightWindow).ToMotor();
+	//std::cout << "m_PlayerDirection ???AAAAAAAAAAAAAAA:  " << m_PlayerDirection << std::endl;
+
+	}
+	if (abs(m_LeftWindow & m_PlayerPosition) < 1)
+	{
+		//m_Mover = (m_LeftBorder * m_Mover * ~m_LeftBorder).ToMotor();
+		//std::cout << "LEEEEEEEEEEEEEEEEEEEEEEEFT\n";
+		m_PlayerDirection = (m_LeftWindow * m_PlayerDirection * ~m_LeftWindow).ToMotor();
+	}
+	if (abs(m_UpWindow & m_PlayerPosition) < m_PlayerSize)
+	{
+		//m_Mover = (m_LeftBorder * m_Mover * ~m_LeftBorder).ToMotor();
+	//std::cout << "m_PlayerDirection ???:  " << m_PlayerDirection << std::endl;
+		//std::cout << "UPPPPPPPPPP\n";
+		m_PlayerDirection = (m_UpWindow * m_PlayerDirection * ~m_UpWindow).ToMotor();
+	//std::cout << "m_PlayerDirection ???AAAAAAAAAAAAAAA:  " << m_PlayerDirection << std::endl;
+	}
+	if (abs(m_DownWindow & m_PlayerPosition) < 1)
+	{
+		//m_Mover = (m_LeftBorder * m_Mover * ~m_LeftBorder).ToMotor();
+		m_PlayerDirection = (m_DownWindow * m_PlayerDirection * ~m_DownWindow).ToMotor();
+		//std::cout << "DOWNNNNNNNNNNNNNNNN\n";
+	}
+	m_PlayerPosition[2] = powerLevel; //restore power level
 }
 
 void Game::CheckGameCollision()
@@ -301,7 +339,7 @@ void Game::ManageRotation(float deltaTime)
 
 	//rotation
 	const float rotSpeed = m_PlayerSpeed/3*deltaTime;
-	Motor rotation{ Motor::Rotation(rotSpeed,TwoBlade(0,0,0,0,0,m_PlayerDirection[5]))};
+	Motor rotation{ Motor::Rotation(rotSpeed,TwoBlade(0,0,0,0,0,m_PlayerDirection[6]))};
 
 	//full rotation & translation around the pillar
 	Motor rotTranslations{ translator * rotation * ~translator };
@@ -317,19 +355,10 @@ void Game::MovePlayer(float deltaTime)
 
 void Game::ReflectPlayer()
 {
-	//distance
-	//try to - the 2 distances to get it and get the distance between 2 points to reflect that
-
-	//translation to the selected pillar
-	//Motor translator{ Motor::Translation(m_PillarsVec[m_SelectedPillar].position.VNorm(),
-	//	TwoBlade(m_PillarsVec[m_SelectedPillar].position[0], m_PillarsVec[m_SelectedPillar].position[1], 0, 0, 0, 0)) };
-
-	//std::cout << "Player was at: x[" << m_PlayerPosition[0] << "], y[" << m_PlayerPosition[1] << "]\n";
 	//full reflection around the pillar
 	auto powerLevel = m_PlayerPosition[2];
 	m_PlayerPosition = (m_PillarsVec[m_SelectedPillar].position * m_PlayerPosition * ~m_PillarsVec[m_SelectedPillar].position).Grade3();
 	m_PlayerPosition[2] = powerLevel;
-	//std::cout << "Player is NOW at: x[" << m_PlayerPosition[0] << "], y[" << m_PlayerPosition[1] << "]\n";
 
 	//check if the distance is away from the main screen, if so put it at the most far away point
 	if (m_PlayerPosition[0] - m_PlayerSize >= m_Window.width) m_PlayerPosition[0] = m_Window.width - m_PlayerSize;
