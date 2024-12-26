@@ -75,6 +75,7 @@ private:
 	Color4f m_PlayerColor{ 1,1,1,1 };
 	//player dimensions to be added
 	TwoBlade m_PlayerDirection{ 1,1,0,0,0,0 };
+	TwoBlade m_PlayerDirectionRotation{ 0,0,0,0,0,1 };
 	Motor m_PlayerMotor{ Motor::Translation(m_PlayerSpeed,m_PlayerDirection)};
 	bool m_IsRotating{ false };
 
