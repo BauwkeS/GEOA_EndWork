@@ -74,7 +74,8 @@ private:
 	float m_PlayerSpeed{ m_NormalPlayerSpeed };
 	Color4f m_PlayerColor{ 1,1,1,1 };
 	//player dimensions to be added
-	TwoBlade m_PlayerDirection{ 1,1,0,0,0,-1 };
+	TwoBlade m_PlayerDirection{ 1,1,0,0,0,0 };
+	Motor m_PlayerMotor{ Motor::Translation(m_PlayerSpeed,m_PlayerDirection)};
 	bool m_IsRotating{ false };
 
 	// FUNCTIONS
@@ -94,10 +95,11 @@ private:
 	void ReflectPlayer();
 
 	//Window boundaries
-	OneBlade m_LeftWindow{ 1,0,0,0 };
-	OneBlade m_RightWindow{ 0,1,0,0 };
+	OneBlade m_LeftWindow{ 0,1,0,0 };
+	OneBlade m_RightWindow{ m_Window.width,-1,0,0 };
 	OneBlade m_DownWindow{ 0,0,1,0 };
-	OneBlade m_UpWindow{ 0,0,0,1 };
+	OneBlade m_UpWindow{ m_Window.height,0,-1,0 };
+	const std::vector<OneBlade> m_WindowBoundaries{ m_LeftWindow,m_RightWindow,m_DownWindow,m_UpWindow };
 
 	//Pillar
 	struct pillar

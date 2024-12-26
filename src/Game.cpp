@@ -220,32 +220,36 @@ void Game::DrawPlayer() const
 void Game::TranslatePlayer(float deltaTime)
 {
 	//Constantly move your player around
-	Motor translateBasePosition{ Motor::Translation(m_PlayerSpeed*deltaTime,m_PlayerDirection) };
-	m_PlayerPosition = (translateBasePosition * m_PlayerPosition * ~translateBasePosition).Grade3();
+	//Motor translateBasePosition{ Motor::Translation(m_PlayerSpeed*deltaTime,m_PlayerDirection) };
+	//m_PlayerPosition = (translateBasePosition * m_PlayerPosition * ~translateBasePosition).Grade3();
+	//std::cout << "m_playerMotor: " << m_PlayerMotor.Grade2() << std::endl;
+	m_PlayerMotor = Motor::Translation(m_PlayerSpeed*deltaTime, m_PlayerDirection);
+	//std::cout << "m_playerMotorAAAAAAAAA: " << m_PlayerMotor.Grade2() << std::endl;
+	m_PlayerPosition = (m_PlayerMotor * m_PlayerPosition * ~m_PlayerMotor).Grade3();
 }
 
 void Game::CheckWindowCollision()
 {
 	//rotation
-	if (m_IsRotating)
-	{
-		if (m_PlayerPosition[0] + m_PlayerSize >= m_Window.width ||
-		m_PlayerPosition[0] <= 0 ||
-		m_PlayerPosition[1] + m_PlayerSize >= m_Window.height ||
-		m_PlayerPosition[1] <= 0)
-		{
-			if (m_PlayerDirection[5] <= -1.f) m_PlayerDirection[5] = 1.f;
-			else m_PlayerDirection[5] = -1.f;
-		}
-	}
-	else
-	{
-		//Check the boundaries of the window to bounce the player back
-		if (m_PlayerPosition[0] + m_PlayerSize >= m_Window.width) m_PlayerDirection[0] = -1;//check right
-		else if (m_PlayerPosition[0] <= 0) m_PlayerDirection[0] = 1; //check left
-		else if (m_PlayerPosition[1] + m_PlayerSize >= m_Window.height) m_PlayerDirection[1] = -1;//check up
-		else if (m_PlayerPosition[1] <= 0) m_PlayerDirection[1] = 1; //check down
-	}
+	//if (m_IsRotating)
+	//{
+	//	if (m_PlayerPosition[0] + m_PlayerSize >= m_Window.width ||
+	//	m_PlayerPosition[0] <= 0 ||
+	//	m_PlayerPosition[1] + m_PlayerSize >= m_Window.height ||
+	//	m_PlayerPosition[1] <= 0)
+	//	{
+	//		if (m_PlayerDirection[5] <= -1.f) m_PlayerDirection[5] = 1.f;
+	//		else m_PlayerDirection[5] = -1.f;
+	//	}
+	//}
+	//else
+	//{
+	//	//Check the boundaries of the window to bounce the player back
+	//	if (m_PlayerPosition[0] + m_PlayerSize >= m_Window.width) m_PlayerDirection[0] = -1;//check right
+	//	else if (m_PlayerPosition[0] <= 0) m_PlayerDirection[0] = 1; //check left
+	//	else if (m_PlayerPosition[1] + m_PlayerSize >= m_Window.height) m_PlayerDirection[1] = -1;//check up
+	//	else if (m_PlayerPosition[1] <= 0) m_PlayerDirection[1] = 1; //check down
+	//}
 
 	//make a plane on all sized
 	//take the motor of the movement that is going off screen
@@ -254,6 +258,39 @@ void Game::CheckWindowCollision()
 	//P join m gives the disance bewen outb abd olane and check if thats less than what you need and then reflect what yu meed
 	//create a ve tor of all collision planes and for loop over them 
 
+
+	//std::cout << "m_RightWindow & m_PlayerPosition???:  " << abs(m_DownWindow & m_PlayerPosition) << std::endl;
+
+
+	if (abs(m_RightWindow & m_PlayerPosition) < m_PlayerSize)
+	{
+		//m_Mover = (m_LeftBorder * m_Mover * ~m_LeftBorder).ToMotor();
+	//std::cout << "m_PlayerDirection ???:  " << m_PlayerDirection << std::endl;
+		std::cout << "RIIIIIIIIIIIIIIIIIIGHT\n";
+		m_PlayerDirection = (m_RightWindow * m_PlayerDirection * ~m_RightWindow).Grade2();
+		//std::cout << "m_PlayerDirection ???AAAAAAAAAAAAAAA:  " << m_PlayerDirection << std::endl;
+
+	}
+	if (abs(m_LeftWindow & m_PlayerPosition) < 2)
+	{
+		//m_Mover = (m_LeftBorder * m_Mover * ~m_LeftBorder).ToMotor();
+		//std::cout << "LEEEEEEEEEEEEEEEEEEEEEEEFT\n";
+		m_PlayerDirection = (m_LeftWindow * m_PlayerDirection * ~m_LeftWindow).Grade2();
+	}
+	if (abs(m_UpWindow & m_PlayerPosition) < m_PlayerSize)
+	{
+		//m_Mover = (m_LeftBorder * m_Mover * ~m_LeftBorder).ToMotor();
+	//std::cout << "m_PlayerDirection ???:  " << m_PlayerDirection << std::endl;
+		//std::cout << "UPPPPPPPPPP\n";
+		m_PlayerDirection = (m_UpWindow * m_PlayerDirection * ~m_UpWindow).Grade2();
+		//std::cout << "m_PlayerDirection ???AAAAAAAAAAAAAAA:  " << m_PlayerDirection << std::endl;
+	}
+	if (abs(m_DownWindow & m_PlayerPosition) < 2)
+	{
+		//m_Mover = (m_LeftBorder * m_Mover * ~m_LeftBorder).ToMotor();
+		m_PlayerDirection = (m_DownWindow * m_PlayerDirection * ~m_DownWindow).Grade2();
+		//std::cout << "DOWNNNNNNNNNNNNNNNN\n";
+	}
 }
 
 void Game::CheckGameCollision()
