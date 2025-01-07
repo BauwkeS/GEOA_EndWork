@@ -5,6 +5,8 @@
 #include "SDL_opengl.h"
 #include <vector>
 
+#include "GameItem.h"
+
 class Game
 {
 public:
@@ -105,18 +107,18 @@ private:
 	const std::vector<OneBlade> m_WindowBoundaries{ m_LeftWindow,m_RightWindow,m_DownWindow,m_UpWindow };
 
 	//Pillar
-	struct pillar
-	{
-		ThreeBlade position;
-		Color4f color;
-		float size;
-		bool isSelected;
-	};
+	//struct pillar
+	//{
+	//	ThreeBlade position;
+	//	Color4f color;
+	//	float size;
+	//	bool isSelected;
+	//};
 
-	std::vector<pillar> m_PillarsVec{};
+	std::vector<Pillar> m_PillarsVec{};
 	int m_SelectedPillar{};
-	const Color4f m_SelectedPillarColor{ 0.8f,0.02f,0.5f,1.f };
-	const Color4f m_BasicPillarColor{ 0.2f,0.01f,0.4f,1.f };
+	//const Color4f m_SelectedPillarColor{ 0.8f,0.02f,0.5f,1.f };
+	//const Color4f m_BasicPillarColor{ 0.2f,0.01f,0.4f,1.f };
 
 	//pillar functions
 	void InitPillars();
@@ -149,7 +151,7 @@ private:
 	void KeyBoardSpawnNewPillar(const SDL_KeyboardEvent& e);
 
 	//Overlap functions
-	bool DoesOverlapAll(ThreeBlade item, int size) const;
-	int CheckOverlapPillars(ThreeBlade item, int size) const;
-	int CheckOverlapPickups(ThreeBlade item, int size) const;
+	bool DoesOverlapAll(ThreeBlade item, int size);
+	int CheckOverlapPillars(ThreeBlade item, int size);
+	int CheckOverlapPickups(ThreeBlade item, int size);
 };

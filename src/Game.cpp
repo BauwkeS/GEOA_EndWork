@@ -285,8 +285,8 @@ void Game::ManageRotation(float deltaTime)
 	//rotate around the selected Pillar
 
 	//translation to the selected pillar
-	Motor translator{ Motor::Translation(m_PillarsVec[m_SelectedPillar].position.VNorm(),
-		TwoBlade(m_PillarsVec[m_SelectedPillar].position[0], m_PillarsVec[m_SelectedPillar].position[1], 0, 0, 0, 0)) };
+	Motor translator{ Motor::Translation(m_PillarsVec[m_SelectedPillar].GetPos().VNorm(),
+		TwoBlade(m_PillarsVec[m_SelectedPillar].GetPos()[0], m_PillarsVec[m_SelectedPillar].GetPos()[1], 0, 0, 0, 0)) };
 
 	//rotation
 	const float rotSpeed = m_PlayerSpeed / 3 * deltaTime;
@@ -316,7 +316,7 @@ void Game::ReflectPlayer()
 	//std::cout << "Player was at: x[" << m_PlayerPosition[0] << "], y[" << m_PlayerPosition[1] << "]\n";
 	//full reflection around the pillar
 	auto powerLevel = m_PlayerPosition[2];
-	m_PlayerPosition = (m_PillarsVec[m_SelectedPillar].position * m_PlayerPosition * ~m_PillarsVec[m_SelectedPillar].position).Grade3();
+	m_PlayerPosition = (m_PillarsVec[m_SelectedPillar].GetPos() * m_PlayerPosition * ~m_PillarsVec[m_SelectedPillar].GetPos()).Grade3();
 	m_PlayerPosition[2] = powerLevel;
 	//std::cout << "Player is NOW at: x[" << m_PlayerPosition[0] << "], y[" << m_PlayerPosition[1] << "]\n";
 
@@ -331,18 +331,15 @@ void Game::ReflectPlayer()
 void Game::InitPillars()
 {
 	//pillar 1
-	pillar pillar1;
-	pillar1.position = ThreeBlade{ m_Window.width / 4 * 1,m_Window.height / 3 * 2,1 };
-	pillar1.size = 30.f;
-	pillar1.isSelected = true;
-	m_PillarsVec.emplace_back(pillar1);
+	Pillar pillar1{
+		ThreeBlade{ m_Window.width / 4 * 1,m_Window.height / 3 * 2,1 },
+	30,true};
+	m_PillarsVec.emplace_back(std::move(pillar1));
 
 	//pillar 2
-	pillar pillar2;
-	pillar2.position = ThreeBlade{ m_Window.width / 4 * 3,m_Window.height / 3 * 1,1 };
-	pillar2.size = 15.f;
-	pillar2.isSelected = false;
-	m_PillarsVec.emplace_back(pillar2);
+	Pillar pillar2{
+		ThreeBlade{ m_Window.width / 4 * 3,m_Window.height / 3 * 1,1 },15};
+	m_PillarsVec.emplace_back(std::move(pillar2));
 
 	//assign colors to the pillars
 	m_SelectedPillar = 0;
@@ -354,8 +351,7 @@ void Game::ColorPillars()
 	//Make the selected pillar pink and the others purple
 	for (auto& p : m_PillarsVec)
 	{
-		if (p.isSelected == true) p.color = m_SelectedPillarColor;
-		else p.color = m_BasicPillarColor;
+		p.ColorPillar();
 	}
 }
 
@@ -364,8 +360,7 @@ void Game::DrawPillars() const
 	//draw all the pillars on screen
 	for (auto p : m_PillarsVec)
 	{
-		utils::SetColor(p.color);
-		utils::FillRect(p.position[0], p.position[1], p.size, p.size);
+		p.DrawPillar();
 	}
 }
 
@@ -374,13 +369,13 @@ void Game::SpawnPillar()
 	//Add a pillar when pressing a button to where the player is
 	// -> make this an amount of points to pay for later
 
-	pillar p;
-	p.position = m_PlayerPosition;
-	p.size = static_cast<float>((rand() % 20) + 10);
-	if (DoesOverlapAll(p.position, p.size)) std::cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n";
-	p.isSelected = false;
-	p.color = m_BasicPillarColor;
-	m_PillarsVec.emplace_back(p);
+	int newSize = (rand() % 20) + 10; 
+	ThreeBlade newPos = m_PlayerPosition;
+	if (!DoesOverlapAll(newPos,newSize))
+	{
+		Pillar p{ newPos,newSize };
+		m_PillarsVec.emplace_back(p);
+	}
 }
 
 void Game::SpawnPickups()
@@ -470,8 +465,8 @@ void Game::KeyboardPillar(const SDL_KeyboardEvent& e)
 		//make every pillar BUT the new one deselected
 		for (int i = 0; i < m_PillarsVec.size(); ++i)
 		{
-			if (i != newActivePillarIndex) m_PillarsVec[i].isSelected = false;
-			else m_PillarsVec[i].isSelected = true;
+			if (i != newActivePillarIndex) m_PillarsVec[i].SetSelected(false);
+			else m_PillarsVec[i].SetSelected(true);
 		}
 
 		m_SelectedPillar = newActivePillarIndex;
@@ -501,7 +496,7 @@ void Game::KeyBoardMovePillar(const SDL_KeyboardEvent& e)
 		if (e.keysym.sym == SDLK_LEFT) x = -1; //left
 
 		Motor translation{ Motor::Translation(1,TwoBlade{x,y,0,0,0,0}) };
-		m_PillarsVec[m_SelectedPillar].position = (translation * m_PillarsVec[m_SelectedPillar].position * ~translation).Grade3();
+		m_PillarsVec[m_SelectedPillar].SetPos((translation * m_PillarsVec[m_SelectedPillar].GetPos() * ~translation).Grade3());
 	}
 }
 
@@ -521,7 +516,7 @@ void Game::KeyBoardSpawnNewPillar(const SDL_KeyboardEvent& e)
 	}
 }
 
-bool Game::DoesOverlapAll(ThreeBlade pos, int size) const
+bool Game::DoesOverlapAll(ThreeBlade pos, int size)
 {
 	//check if your item overlaps with anything
 	bool hasHit{ false };
@@ -532,15 +527,15 @@ bool Game::DoesOverlapAll(ThreeBlade pos, int size) const
 	return hasHit;
 }
 
-int Game::CheckOverlapPillars(ThreeBlade pos, int size) const
+int Game::CheckOverlapPillars(ThreeBlade pos, int size)
 {
 	int hasHit{ 0 };
 
 	//pillars
 	for (int i = 0; i < m_PillarsVec.size(); ++i)
 	{
-		auto bladeDis = m_PillarsVec[i].position & ThreeBlade{ pos[0], pos[1],0 };
-		if (abs(bladeDis.Norm()) < static_cast <float>(size + m_PillarsVec[i].size / 2))
+		auto bladeDis = m_PillarsVec[i].GetPos() & ThreeBlade{ pos[0], pos[1],0 };
+		if (abs(bladeDis.Norm()) < static_cast <float>(size/2 + m_PillarsVec[i].GetSize() / 2))
 		{
 			return i;
 		}
@@ -549,7 +544,7 @@ int Game::CheckOverlapPillars(ThreeBlade pos, int size) const
 	return hasHit-1;
 }
 
-int Game::CheckOverlapPickups(ThreeBlade pos, int size) const
+int Game::CheckOverlapPickups(ThreeBlade pos, int size)
 {
 	int hasHit{ 0 };
 
