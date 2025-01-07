@@ -8,15 +8,15 @@
 class Game
 {
 public:
-	explicit Game( const Window& window );
-	Game( const Game& other ) = delete;
-	Game& operator=( const Game& other ) = delete;
+	explicit Game(const Window& window);
+	Game(const Game& other) = delete;
+	Game& operator=(const Game& other) = delete;
 	Game(Game&& other) = delete;
 	Game& operator=(Game&& other) = delete;
 
 	~Game();
 
-	void Run( );
+	void Run();
 
 	void Update(float elapsedSec);
 
@@ -38,15 +38,15 @@ public:
 	}
 	void ProcessMouseMotionEvent(const SDL_MouseMotionEvent& e)
 	{
-		
+
 	}
 	void ProcessMouseDownEvent(const SDL_MouseButtonEvent& e)
 	{
-		
+
 	}
 	void ProcessMouseUpEvent(const SDL_MouseButtonEvent& e)
 	{
-		
+
 	}
 
 	const Rectf& GetViewPort() const
@@ -69,7 +69,7 @@ private:
 	const float m_MaxElapsedSeconds;
 
 	//Player
-	ThreeBlade m_PlayerPosition{ m_Window.width/2,m_Window.height/2,0 };
+	ThreeBlade m_PlayerPosition{ m_Window.width / 2,m_Window.height / 2,0 };
 	const float m_PlayerSize{ 20.f };
 	const float m_NormalPlayerSpeed{ 200.f };
 	float m_PlayerSpeed{ m_NormalPlayerSpeed };
@@ -77,13 +77,13 @@ private:
 	//player dimensions to be added
 	TwoBlade m_PlayerDirection{ 1,1,0,0,0,0 };
 	TwoBlade m_PlayerDirectionRotation{ 0,0,0,0,0,1 };
-	Motor m_PlayerMotor{ Motor::Translation(m_PlayerSpeed,m_PlayerDirection)};
+	Motor m_PlayerMotor{ Motor::Translation(m_PlayerSpeed,m_PlayerDirection) };
 	bool m_IsRotating{ false };
 	int m_PlayerScore{ 0 };
 
 	// FUNCTIONS
-	void InitializeGameEngine( );
-	void CleanupGameEngine( );
+	void InitializeGameEngine();
+	void CleanupGameEngine();
 	void PrintGameControls();
 
 	//Player functions
@@ -147,4 +147,9 @@ private:
 	void KeyBoardMovePillar(const SDL_KeyboardEvent& e);
 	void KeyBoardReflectPlayer(const SDL_KeyboardEvent& e);
 	void KeyBoardSpawnNewPillar(const SDL_KeyboardEvent& e);
+
+	//Overlap functions
+	bool DoesOverlapAll(ThreeBlade item, int size) const;
+	int CheckOverlapPillars(ThreeBlade item, int size) const;
+	int CheckOverlapPickups(ThreeBlade item, int size) const;
 };

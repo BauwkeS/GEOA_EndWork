@@ -222,7 +222,7 @@ void Game::DrawPlayer() const
 void Game::TranslatePlayer(float deltaTime)
 {
 	//Constantly move your player around
-	m_PlayerMotor = Motor::Translation(m_PlayerSpeed*deltaTime, m_PlayerDirection);
+	m_PlayerMotor = Motor::Translation(m_PlayerSpeed * deltaTime, m_PlayerDirection);
 	m_PlayerPosition = (m_PlayerMotor * m_PlayerPosition * ~m_PlayerMotor).Grade3();
 }
 
@@ -232,9 +232,9 @@ void Game::CheckWindowCollision()
 	auto centerOfPlayer = m_PlayerPosition;
 	centerOfPlayer[0] += m_PlayerSize / 2;
 	centerOfPlayer[1] += m_PlayerSize / 2;
-	
+
 	//when you hit the boundary, reflect on it
-	for (auto &boundary : m_WindowBoundaries)
+	for (auto& boundary : m_WindowBoundaries)
 	{
 		if (abs(boundary & centerOfPlayer) < m_PlayerSize / 2)
 		{
@@ -243,15 +243,14 @@ void Game::CheckWindowCollision()
 			else m_PlayerDirection = (boundary * m_PlayerDirection * ~boundary).Grade2();
 		}
 	}
-	
+
 }
 
 void Game::CheckGameCollision()
 {
 	//check collision with other game objects
 
-	//enemy?
-	
+	PickupCollision();
 }
 
 void Game::VisualizeEnergy()
@@ -259,10 +258,10 @@ void Game::VisualizeEnergy()
 	//Change color of the square depending on the amount of energy
 	m_PlayerColor =
 		Color4f{
-			(100.f- m_PlayerPosition[2])/100.f,
-			m_PlayerPosition[2] /100.f,
+			(100.f - m_PlayerPosition[2]) / 100.f,
+			m_PlayerPosition[2] / 100.f,
 			0,
-			1};
+			1 };
 }
 
 void Game::ManageEnergySpeed(float deltaTime)
@@ -287,16 +286,16 @@ void Game::ManageRotation(float deltaTime)
 
 	//translation to the selected pillar
 	Motor translator{ Motor::Translation(m_PillarsVec[m_SelectedPillar].position.VNorm(),
-		TwoBlade(m_PillarsVec[m_SelectedPillar].position[0], m_PillarsVec[m_SelectedPillar].position[1], 0, 0, 0, 0))};
+		TwoBlade(m_PillarsVec[m_SelectedPillar].position[0], m_PillarsVec[m_SelectedPillar].position[1], 0, 0, 0, 0)) };
 
 	//rotation
-	const float rotSpeed = m_PlayerSpeed/3*deltaTime;
-	Motor rotation{ Motor::Rotation(rotSpeed,m_PlayerDirectionRotation)};
+	const float rotSpeed = m_PlayerSpeed / 3 * deltaTime;
+	Motor rotation{ Motor::Rotation(rotSpeed,m_PlayerDirectionRotation) };
 
 	//full rotation & translation around the pillar
 	Motor rotTranslations{ translator * rotation * ~translator };
-	m_PlayerPosition = (rotTranslations * m_PlayerPosition * ~rotTranslations).Grade3();		
-		
+	m_PlayerPosition = (rotTranslations * m_PlayerPosition * ~rotTranslations).Grade3();
+
 }
 
 void Game::MovePlayer(float deltaTime)
@@ -353,7 +352,7 @@ void Game::InitPillars()
 void Game::ColorPillars()
 {
 	//Make the selected pillar pink and the others purple
-	for (auto &p : m_PillarsVec)
+	for (auto& p : m_PillarsVec)
 	{
 		if (p.isSelected == true) p.color = m_SelectedPillarColor;
 		else p.color = m_BasicPillarColor;
@@ -363,7 +362,7 @@ void Game::ColorPillars()
 void Game::DrawPillars() const
 {
 	//draw all the pillars on screen
-	for(auto p : m_PillarsVec)
+	for (auto p : m_PillarsVec)
 	{
 		utils::SetColor(p.color);
 		utils::FillRect(p.position[0], p.position[1], p.size, p.size);
@@ -378,6 +377,7 @@ void Game::SpawnPillar()
 	pillar p;
 	p.position = m_PlayerPosition;
 	p.size = static_cast<float>((rand() % 20) + 10);
+	if (DoesOverlapAll(p.position, p.size)) std::cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n";
 	p.isSelected = false;
 	p.color = m_BasicPillarColor;
 	m_PillarsVec.emplace_back(p);
@@ -387,8 +387,9 @@ void Game::SpawnPickups()
 {
 	//always have at least 1 pickup there
 	if (m_PickupsVec.empty()) MakeNewPickup();
-	//add new extra pickup when grabbing one -> max 3
-
+	//add pickups when points are above 1 and 5
+	if (m_PlayerScore >= 1 && m_PickupsVec.size() <= 1) MakeNewPickup();
+	if (m_PlayerScore >= 5) MakeNewPickup();
 }
 
 void Game::MakeNewPickup()
@@ -402,8 +403,8 @@ void Game::MakeNewPickup()
 		int maxWidth = static_cast<int>(m_Window.width - static_cast<float>(p.size));
 		int maxHeight = static_cast<int>(m_Window.height - static_cast<float>(p.size));
 		p.position = { static_cast<float>(rand() % maxWidth), static_cast<float>(rand() % maxHeight),0 };
-		p.points = abs((p.size/10) - 4); //pickup points according to size
-		std::cout << "pickup points: " << p.points;
+		p.points = abs((p.size / 10) - 4); //pickup points according to size
+		//std::cout << "pickup point spawned has: " << p.points << std::endl;
 		m_PickupsVec.emplace_back(p);
 	}
 }
@@ -411,14 +412,40 @@ void Game::MakeNewPickup()
 void Game::DrawPickups() const
 {
 	//draw all the pickups on screen
-	//Pickups are only visible when you have more than 40% of energy
-	if (m_PlayerPosition[2] >= 40)
+	//Pickups are only visible when you have more than 30% of energy
+	if (m_PlayerPosition[2] >= 30)
 	{
 		utils::SetColor(m_PickupColor);
 		for (auto p : m_PickupsVec)
 		{
-			utils::FillRect(p.position[0], p.position[1], p.size, p.size);
+			utils::FillEllipse(p.position[0], p.position[1], p.size, p.size);
 		}
+	}
+}
+
+void Game::PickupCollision()
+{
+	//get the player center point for easy collision loop
+	auto centerOfPlayer = m_PlayerPosition;
+	centerOfPlayer[0] += m_PlayerSize / 2;
+	centerOfPlayer[1] += m_PlayerSize / 2;
+
+	//when hit -> remove pickup and absorb points
+	int pickupHit = CheckOverlapPickups(centerOfPlayer, m_PlayerSize) - 1;
+	if (pickupHit >= 0)
+	{
+		for (int i = 0; i < m_PickupsVec.size(); ++i)
+		{
+			auto bladeDis = m_PickupsVec[i].position & centerOfPlayer;
+			if (abs(bladeDis.Norm()) < static_cast <float>(100 + m_PickupsVec[i].size / 2))
+			{
+				m_PlayerScore += m_PickupsVec[pickupHit].points;
+				std::cout << "New player score: " << m_PlayerScore << std::endl;
+
+				break;
+			}
+		}
+		m_PickupsVec.erase(m_PickupsVec.begin() + pickupHit);
 	}
 }
 
@@ -501,6 +528,53 @@ void Game::KeyBoardSpawnNewPillar(const SDL_KeyboardEvent& e)
 	{
 		SpawnPillar();
 	}
+}
+
+bool Game::DoesOverlapAll(ThreeBlade pos, int size) const
+{
+	//check if your item overlaps with anything
+	bool hasHit{ false };
+
+	if (CheckOverlapPickups(pos, size) - 1 >= 0
+		|| CheckOverlapPillars(pos, size) - 1 >= 0) hasHit = true;
+
+	return hasHit;
+}
+
+int Game::CheckOverlapPillars(ThreeBlade pos, int size) const
+{
+	int hasHit{ 0 };
+
+	//pillars
+	for (int i = 0; i < m_PillarsVec.size(); ++i)
+	{
+		auto bladeDis = m_PillarsVec[i].position & pos;
+		if (abs(bladeDis.Norm()) < static_cast <float>(size + m_PillarsVec[i].size / 2))
+		{
+			return i + 1;
+		}
+	}
+	//nothing hit
+	return hasHit;
+}
+
+int Game::CheckOverlapPickups(ThreeBlade pos, int size) const
+{
+	int hasHit{ 0 };
+
+	//pickups
+	for (int i = 0; i < m_PickupsVec.size(); ++i)
+	{
+		auto bladeDis = m_PickupsVec[i].position & pos;
+		std::cout << "abs(bladeDis.Norm(): " << abs(bladeDis.Norm()) << std::endl;
+		std::cout << "size/2 + m_PickupsVec[i].size / 2: " << static_cast <float>(size / 2 + m_PickupsVec[i].size / 2) << std::endl;
+		if (abs(bladeDis.Norm()) < static_cast <float>(size / 2 + m_PickupsVec[i].size / 2))
+		{
+			return i + 1;
+		}
+	}
+	//nothing hit
+	return hasHit;
 }
 
 void Game::Update(float elapsedSec)
