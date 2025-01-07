@@ -431,20 +431,11 @@ void Game::PickupCollision()
 	centerOfPlayer[1] += m_PlayerSize / 2;
 
 	//when hit -> remove pickup and absorb points
-	int pickupHit = CheckOverlapPickups(centerOfPlayer, m_PlayerSize) - 1;
+	int pickupHit = CheckOverlapPickups(centerOfPlayer, m_PlayerSize);
 	if (pickupHit >= 0)
 	{
-		for (int i = 0; i < m_PickupsVec.size(); ++i)
-		{
-			auto bladeDis = m_PickupsVec[i].position & centerOfPlayer;
-			if (abs(bladeDis.Norm()) < static_cast <float>(100 + m_PickupsVec[i].size / 2))
-			{
-				m_PlayerScore += m_PickupsVec[pickupHit].points;
-				std::cout << "New player score: " << m_PlayerScore << std::endl;
-
-				break;
-			}
-		}
+		m_PlayerScore += m_PickupsVec[pickupHit].points;
+		std::cout << "New player score: " << m_PlayerScore << std::endl;
 		m_PickupsVec.erase(m_PickupsVec.begin() + pickupHit);
 	}
 }
@@ -535,8 +526,8 @@ bool Game::DoesOverlapAll(ThreeBlade pos, int size) const
 	//check if your item overlaps with anything
 	bool hasHit{ false };
 
-	if (CheckOverlapPickups(pos, size) - 1 >= 0
-		|| CheckOverlapPillars(pos, size) - 1 >= 0) hasHit = true;
+	if (CheckOverlapPickups(pos, size) >= 0
+		|| CheckOverlapPillars(pos, size)  >= 0) hasHit = true;
 
 	return hasHit;
 }
@@ -548,14 +539,14 @@ int Game::CheckOverlapPillars(ThreeBlade pos, int size) const
 	//pillars
 	for (int i = 0; i < m_PillarsVec.size(); ++i)
 	{
-		auto bladeDis = m_PillarsVec[i].position & pos;
+		auto bladeDis = m_PillarsVec[i].position & ThreeBlade{ pos[0], pos[1],0 };
 		if (abs(bladeDis.Norm()) < static_cast <float>(size + m_PillarsVec[i].size / 2))
 		{
-			return i + 1;
+			return i;
 		}
 	}
 	//nothing hit
-	return hasHit;
+	return hasHit-1;
 }
 
 int Game::CheckOverlapPickups(ThreeBlade pos, int size) const
@@ -565,16 +556,16 @@ int Game::CheckOverlapPickups(ThreeBlade pos, int size) const
 	//pickups
 	for (int i = 0; i < m_PickupsVec.size(); ++i)
 	{
-		auto bladeDis = m_PickupsVec[i].position & pos;
-		std::cout << "abs(bladeDis.Norm(): " << abs(bladeDis.Norm()) << std::endl;
-		std::cout << "size/2 + m_PickupsVec[i].size / 2: " << static_cast <float>(size / 2 + m_PickupsVec[i].size / 2) << std::endl;
+		auto bladeDis = m_PickupsVec[i].position & ThreeBlade{ pos[0], pos[1],0 };
+		//std::cout << "abs(bladeDis.Norm(): " << abs(bladeDis.Norm()) << std::endl;
+		//std::cout << "size/2 + m_PickupsVec[i].size / 2: " << static_cast <float>(size / 2 + m_PickupsVec[i].size / 2) << std::endl;
 		if (abs(bladeDis.Norm()) < static_cast <float>(size / 2 + m_PickupsVec[i].size / 2))
 		{
-			return i + 1;
+			return i;
 		}
 	}
 	//nothing hit
-	return hasHit;
+	return hasHit-1;
 }
 
 void Game::Update(float elapsedSec)
