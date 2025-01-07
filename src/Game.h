@@ -79,6 +79,7 @@ private:
 	TwoBlade m_PlayerDirectionRotation{ 0,0,0,0,0,1 };
 	Motor m_PlayerMotor{ Motor::Translation(m_PlayerSpeed,m_PlayerDirection)};
 	bool m_IsRotating{ false };
+	int m_PlayerScore{ 0 };
 
 	// FUNCTIONS
 	void InitializeGameEngine( );
@@ -122,6 +123,22 @@ private:
 	void ColorPillars();
 	void DrawPillars() const;
 	void SpawnPillar();
+
+	//Pickups
+	struct pickup
+	{
+		ThreeBlade position;
+		int size;
+		int points;
+	};
+	std::vector<pickup> m_PickupsVec{};
+	const Color4f m_PickupColor{ 0.f,1.f,0.f,1.f };
+
+	//pickup functions
+	void SpawnPickups();
+	void MakeNewPickup();
+	void DrawPickups() const;
+	void PickupCollision();
 
 	//Keyboard functions
 	void KeyboardSpeed(const SDL_KeyboardEvent& e);

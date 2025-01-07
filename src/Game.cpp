@@ -383,6 +383,45 @@ void Game::SpawnPillar()
 	m_PillarsVec.emplace_back(p);
 }
 
+void Game::SpawnPickups()
+{
+	//always have at least 1 pickup there
+	if (m_PickupsVec.empty()) MakeNewPickup();
+	//add new extra pickup when grabbing one -> max 3
+
+}
+
+void Game::MakeNewPickup()
+{
+	//never have more than 3 pickups
+	if (m_PickupsVec.size() < 3)
+	{
+		//Make a new pickup and add it to the vector
+		pickup p;
+		p.size = (rand() % 3 + 1) * 10;
+		int maxWidth = static_cast<int>(m_Window.width - static_cast<float>(p.size));
+		int maxHeight = static_cast<int>(m_Window.height - static_cast<float>(p.size));
+		p.position = { static_cast<float>(rand() % maxWidth), static_cast<float>(rand() % maxHeight),0 };
+		p.points = abs((p.size/10) - 4); //pickup points according to size
+		std::cout << "pickup points: " << p.points;
+		m_PickupsVec.emplace_back(p);
+	}
+}
+
+void Game::DrawPickups() const
+{
+	//draw all the pickups on screen
+	//Pickups are only visible when you have more than 40% of energy
+	if (m_PlayerPosition[2] >= 40)
+	{
+		utils::SetColor(m_PickupColor);
+		for (auto p : m_PickupsVec)
+		{
+			utils::FillRect(p.position[0], p.position[1], p.size, p.size);
+		}
+	}
+}
+
 void Game::KeyboardSpeed(const SDL_KeyboardEvent& e)
 {
 	//when pressing S => enable or disable speed
@@ -467,6 +506,9 @@ void Game::KeyBoardSpawnNewPillar(const SDL_KeyboardEvent& e)
 void Game::Update(float elapsedSec)
 {
 	CheckWindowCollision();
+	CheckGameCollision();
+
+	SpawnPickups();
 
 	MovePlayer(elapsedSec);
 
@@ -481,5 +523,6 @@ void Game::Draw() const
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	DrawPillars();
+	DrawPickups();
 	DrawPlayer();
 }
