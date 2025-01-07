@@ -30,6 +30,7 @@ public:
 		KeyboardRotatePillar(e);
 		KeyBoardMovePillar(e);
 		KeyBoardReflectPlayer(e);
+		KeyBoardSpawnNewPillar(e);
 	}
 	void ProcessKeyUpEvent(const SDL_KeyboardEvent& e)
 	{
@@ -113,12 +114,14 @@ private:
 
 	std::vector<pillar> m_PillarsVec{};
 	int m_SelectedPillar{};
+	const Color4f m_SelectedPillarColor{ 0.8f,0.02f,0.5f,1.f };
+	const Color4f m_BasicPillarColor{ 0.2f,0.01f,0.4f,1.f };
 
 	//pillar functions
 	void InitPillars();
 	void ColorPillars();
 	void DrawPillars() const;
-
+	void SpawnPillar();
 
 	//Keyboard functions
 	void KeyboardSpeed(const SDL_KeyboardEvent& e);
@@ -126,4 +129,5 @@ private:
 	void KeyboardRotatePillar(const SDL_KeyboardEvent& e);
 	void KeyBoardMovePillar(const SDL_KeyboardEvent& e);
 	void KeyBoardReflectPlayer(const SDL_KeyboardEvent& e);
+	void KeyBoardSpawnNewPillar(const SDL_KeyboardEvent& e);
 };

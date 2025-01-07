@@ -209,6 +209,8 @@ void Game::PrintGameControls()
 	std::cout << "- W: Reflect around the selected pillar\n";
 	std::cout << "- Arrow keys: Move the selected pillar\n";
 	std::cout << "-------------------------\n";
+	std::cout << "- P: Spawn a new pillar on the player\n";
+	std::cout << "-------------------------\n";
 }
 
 void Game::DrawPlayer() const
@@ -353,8 +355,8 @@ void Game::ColorPillars()
 	//Make the selected pillar pink and the others purple
 	for (auto &p : m_PillarsVec)
 	{
-		if (p.isSelected == true) p.color = Color4f{ 0.8f,0.02f,0.5f,1.f };
-		else p.color = Color4f{ 0.2f,0.01f,0.4f,1.f };
+		if (p.isSelected == true) p.color = m_SelectedPillarColor;
+		else p.color = m_BasicPillarColor;
 	}
 }
 
@@ -366,6 +368,19 @@ void Game::DrawPillars() const
 		utils::SetColor(p.color);
 		utils::FillRect(p.position[0], p.position[1], p.size, p.size);
 	}
+}
+
+void Game::SpawnPillar()
+{
+	//Add a pillar when pressing a button to where the player is
+	// -> make this an amount of points to pay for later
+
+	pillar p;
+	p.position = m_PlayerPosition;
+	p.size = static_cast<float>((rand() % 20) + 10);
+	p.isSelected = false;
+	p.color = m_BasicPillarColor;
+	m_PillarsVec.emplace_back(p);
 }
 
 void Game::KeyboardSpeed(const SDL_KeyboardEvent& e)
@@ -438,6 +453,14 @@ void Game::KeyBoardReflectPlayer(const SDL_KeyboardEvent& e)
 	if (e.keysym.sym == SDLK_w)
 	{
 		ReflectPlayer();
+	}
+}
+
+void Game::KeyBoardSpawnNewPillar(const SDL_KeyboardEvent& e)
+{
+	if (e.keysym.sym == SDLK_p)
+	{
+		SpawnPillar();
 	}
 }
 
