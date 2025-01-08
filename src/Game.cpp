@@ -209,8 +209,9 @@ void Game::PrintGameControls()
 	std::cout << "- W: Reflect around the selected pillar\n";
 	std::cout << "- Arrow keys: Move the selected pillar\n";
 	std::cout << "-------------------------\n";
-	std::cout << "- P: Spawn a new pillar on the player\n";
+	std::cout << "- P: Spawn a new pillar on the player for 2 points\n";
 	std::cout << "-------------------------\n";
+	std::cout << "Player score: 0\n";
 }
 
 void Game::DrawPlayer() const
