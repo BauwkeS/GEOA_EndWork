@@ -115,7 +115,7 @@ private:
 	//	bool isSelected;
 	//};
 
-	std::vector<Pillar> m_PillarsVec{};
+	std::vector<std::unique_ptr<Pillar>> m_PillarsVec{};
 	int m_SelectedPillar{};
 	//const Color4f m_SelectedPillarColor{ 0.8f,0.02f,0.5f,1.f };
 	//const Color4f m_BasicPillarColor{ 0.2f,0.01f,0.4f,1.f };
