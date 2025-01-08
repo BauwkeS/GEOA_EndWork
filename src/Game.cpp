@@ -360,7 +360,7 @@ void Game::DrawPillars() const
 	//draw all the pillars on screen
 	for (auto p : m_PillarsVec)
 	{
-		p.DrawPillar();
+		p.Draw();
 	}
 }
 
@@ -393,14 +393,19 @@ void Game::MakeNewPickup()
 	if (m_PickupsVec.size() < 3)
 	{
 		//Make a new pickup and add it to the vector
-		pickup p;
-		p.size = (rand() % 3 + 1) * 10;
-		int maxWidth = static_cast<int>(m_Window.width - static_cast<float>(p.size));
-		int maxHeight = static_cast<int>(m_Window.height - static_cast<float>(p.size));
-		p.position = { static_cast<float>(rand() % maxWidth), static_cast<float>(rand() % maxHeight),0 };
-		p.points = abs((p.size / 10) - 4); //pickup points according to size
+		int newSize = (rand() % 3 + 1) * 10;
+		int maxWidth = static_cast<int>(m_Window.width - static_cast<float>(newSize));
+		int maxHeight = static_cast<int>(m_Window.height - static_cast<float>(newSize));
+		ThreeBlade newPos = { static_cast<float>(rand() % maxWidth), static_cast<float>(rand() % maxHeight),0 };
+		while (DoesOverlapAll(newPos, newSize))
+		{
+			newPos = { static_cast<float>(rand() % maxWidth), static_cast<float>(rand() % maxHeight),0 };
+		}
+		//pickup points according to size
+		int newPoints = abs((newSize / 10) - 4);
+
 		//std::cout << "pickup point spawned has: " << p.points << std::endl;
-		m_PickupsVec.emplace_back(p);
+		m_PickupsVec.emplace_back(std::make_unique<Pickup>(newPos, newSize, newPoints));
 	}
 }
 
@@ -410,10 +415,9 @@ void Game::DrawPickups() const
 	//Pickups are only visible when you have more than 30% of energy
 	if (m_PlayerPosition[2] >= 30)
 	{
-		utils::SetColor(m_PickupColor);
-		for (auto p : m_PickupsVec)
+		for (const auto& p : m_PickupsVec)
 		{
-			utils::FillEllipse(p.position[0], p.position[1], p.size, p.size);
+			p->Draw();
 		}
 	}
 }
@@ -429,9 +433,11 @@ void Game::PickupCollision()
 	int pickupHit = CheckOverlapPickups(centerOfPlayer, m_PlayerSize);
 	if (pickupHit >= 0)
 	{
-		m_PlayerScore += m_PickupsVec[pickupHit].points;
+		auto points = m_PickupsVec[pickupHit]->GetPoints();
+		m_PlayerScore += points;
 		std::cout << "New player score: " << m_PlayerScore << std::endl;
-		m_PickupsVec.erase(m_PickupsVec.begin() + pickupHit);
+		auto it = std::find(m_PickupsVec.begin(), m_PickupsVec.end(), m_PickupsVec[pickupHit]);
+		m_PickupsVec.erase(it);
 	}
 }
 
@@ -551,10 +557,10 @@ int Game::CheckOverlapPickups(ThreeBlade pos, int size)
 	//pickups
 	for (int i = 0; i < m_PickupsVec.size(); ++i)
 	{
-		auto bladeDis = m_PickupsVec[i].position & ThreeBlade{ pos[0], pos[1],0 };
+		auto bladeDis = m_PickupsVec[i]->GetPos() & ThreeBlade{ pos[0], pos[1],0 };
 		//std::cout << "abs(bladeDis.Norm(): " << abs(bladeDis.Norm()) << std::endl;
 		//std::cout << "size/2 + m_PickupsVec[i].size / 2: " << static_cast <float>(size / 2 + m_PickupsVec[i].size / 2) << std::endl;
-		if (abs(bladeDis.Norm()) < static_cast <float>(size / 2 + m_PickupsVec[i].size / 2))
+		if (abs(bladeDis.Norm()) < static_cast <float>(size / 2 + m_PickupsVec[i]->GetSize() / 2))
 		{
 			return i;
 		}

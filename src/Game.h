@@ -127,14 +127,14 @@ private:
 	void SpawnPillar();
 
 	//Pickups
-	struct pickup
+	/*struct pickup
 	{
 		ThreeBlade position;
 		int size;
 		int points;
-	};
-	std::vector<pickup> m_PickupsVec{};
-	const Color4f m_PickupColor{ 0.f,1.f,0.f,1.f };
+	};*/
+	std::vector<std::unique_ptr<Pickup>> m_PickupsVec;
+	//const Color4f m_PickupColor{ 0.f,1.f,0.f,1.f };
 
 	//pickup functions
 	void SpawnPickups();
