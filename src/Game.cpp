@@ -367,11 +367,17 @@ void Game::SpawnPillar()
 	//Add a pillar when pressing a button to where the player is
 	// -> make this an amount of points to pay for later
 
-	int newSize = (rand() % 20) + 10; 
-	ThreeBlade newPos = m_PlayerPosition;
-	if (!DoesOverlapAll(newPos,newSize))
+	//placing a pillar costs 2 points
+	if (m_PlayerScore >= 2)
 	{
-		m_PillarsVec.emplace_back(std::make_unique<Pillar>(newPos, newSize));
+		int newSize = (rand() % 20) + 10;
+		ThreeBlade newPos = m_PlayerPosition;
+		if (!DoesOverlapAll(newPos, newSize))
+		{
+			m_PillarsVec.emplace_back(std::make_unique<Pillar>(newPos, newSize));
+			m_PlayerScore -= 2;
+			std::cout << "Pillar bought! New score: " << m_PlayerScore << '\n';
+		}
 	}
 }
 
@@ -432,7 +438,7 @@ void Game::PickupCollision()
 	{
 		auto points = m_PickupsVec[pickupHit]->GetPoints();
 		m_PlayerScore += points;
-		std::cout << "New player score: " << m_PlayerScore << std::endl;
+		std::cout << "New player score: " << m_PlayerScore << '\n';
 		auto it = std::find(m_PickupsVec.begin(), m_PickupsVec.end(), m_PickupsVec[pickupHit]);
 		m_PickupsVec.erase(it);
 	}
@@ -532,38 +538,12 @@ bool Game::DoesOverlapAll(ThreeBlade pos, int size)
 
 int Game::CheckOverlapPillars(ThreeBlade pos, int size)
 {
-	int hasHit{ 0 };
-
-	//pillars
-	for (int i = 0; i < m_PillarsVec.size(); ++i)
-	{
-		auto bladeDis = m_PillarsVec[i]->GetPos() & ThreeBlade{ pos[0], pos[1],0 };
-		if (abs(bladeDis.Norm()) < static_cast <float>(size/2 + m_PillarsVec[i]->GetSize() / 2))
-		{
-			return i;
-		}
-	}
-	//nothing hit
-	return hasHit-1;
+	return CheckOverlapGameItems(pos, size, m_PillarsVec);
 }
 
 int Game::CheckOverlapPickups(ThreeBlade pos, int size)
 {
-	int hasHit{ 0 };
-
-	//pickups
-	for (int i = 0; i < m_PickupsVec.size(); ++i)
-	{
-		auto bladeDis = m_PickupsVec[i]->GetPos() & ThreeBlade{ pos[0], pos[1],0 };
-		//std::cout << "abs(bladeDis.Norm(): " << abs(bladeDis.Norm()) << std::endl;
-		//std::cout << "size/2 + m_PickupsVec[i].size / 2: " << static_cast <float>(size / 2 + m_PickupsVec[i].size / 2) << std::endl;
-		if (abs(bladeDis.Norm()) < static_cast <float>(size / 2 + m_PickupsVec[i]->GetSize() / 2))
-		{
-			return i;
-		}
-	}
-	//nothing hit
-	return hasHit-1;
+	return CheckOverlapGameItems(pos, size, m_PickupsVec);
 }
 
 void Game::Update(float elapsedSec)

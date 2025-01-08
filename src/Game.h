@@ -151,6 +151,24 @@ private:
 	void KeyBoardSpawnNewPillar(const SDL_KeyboardEvent& e);
 
 	//Overlap functions
+	template <typename T>
+	int CheckOverlapGameItems(const ThreeBlade& pos, int size, const std::vector<std::unique_ptr<T>>& vec)
+	{
+		int hasHit{ -1 };
+
+		//game items
+		for (int i = 0; i < vec.size(); ++i)
+		{
+			auto bladeDis = vec[i]->GetPos() & ThreeBlade { pos[0], pos[1], 0 };
+			if (abs(bladeDis.Norm()) < static_cast <float>(size / 2 + vec[i]->GetSize() / 2))
+			{
+				hasHit = i;
+			}
+		}
+		//nothing hit
+		return hasHit;
+	}
+
 	bool DoesOverlapAll(ThreeBlade item, int size);
 	int CheckOverlapPillars(ThreeBlade item, int size);
 	int CheckOverlapPickups(ThreeBlade item, int size);
