@@ -36,7 +36,7 @@ public:
 	//pillar functions
 	void ColorPillar();
 	bool IsSelected() { return m_IsSelected; }
-	void SetSelected(bool value) { m_IsSelected = value; }
+	void SetSelected(bool value) { m_IsSelected = value; ColorPillar(); }
 
 private:
 	const Color4f m_SelectedPillarColor{ 0.8f,0.02f,0.5f,1.f };

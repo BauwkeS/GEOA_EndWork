@@ -209,9 +209,11 @@ void Game::PrintGameControls()
 	std::cout << "- W: Reflect around the selected pillar\n";
 	std::cout << "- Arrow keys: Move the selected pillar\n";
 	std::cout << "-------------------------\n";
+	std::cout << "----------SHOP-----------\n";
 	std::cout << "- P: Spawn a new pillar on the player for 2 points\n";
+	std::cout << "- mouse R click: select a pillar of choice for 1 point\n";
 	std::cout << "-------------------------\n";
-	std::cout << "Player score: 0\n";
+	std::cout << "Player score: " << m_PlayerScore << "\n";
 }
 
 void Game::DrawPlayer() const
@@ -366,13 +368,11 @@ void Game::DrawPillars() const
 void Game::SpawnPillar()
 {
 	//Add a pillar when pressing a button to where the player is
-	// -> make this an amount of points to pay for later
-
 	//placing a pillar costs 2 points
 	if (m_PlayerScore >= 2)
 	{
-		int newSize = (rand() % 20) + 10;
-		ThreeBlade newPos = m_PlayerPosition;
+		int newSize = ((rand() % 2) + 1) * 10;
+		ThreeBlade newPos = { m_PlayerPosition[0],m_PlayerPosition [1],0};
 		if (!DoesOverlapAll(newPos, newSize))
 		{
 			m_PillarsVec.emplace_back(std::make_unique<Pillar>(newPos, newSize));
@@ -523,6 +523,28 @@ void Game::KeyBoardSpawnNewPillar(const SDL_KeyboardEvent& e)
 	if (e.keysym.sym == SDLK_p)
 	{
 		SpawnPillar();
+	}
+}
+
+void Game::MouseSelectPillar(const SDL_MouseButtonEvent& e)
+{
+	//Instantly select a new pillar
+	//costs 1 point
+	if (m_PlayerScore >= 1)
+	{
+		ThreeBlade mousePos{ static_cast<float>(e.x),static_cast<float>(e.y),0 };
+		int selectedPillar = CheckOverlapPillars(mousePos, 0);
+		if (selectedPillar >=0 && !m_PillarsVec[selectedPillar]->IsSelected())
+		{
+			//select new pillar and deselect others
+			for (const auto& p : m_PillarsVec)
+			{
+				p->SetSelected(false);
+			}
+			m_PillarsVec[selectedPillar]->SetSelected(true);
+			m_PlayerScore -= 1;
+			std::cout << "Pillar selected! New score: " << m_PlayerScore << '\n';
+		}
 	}
 }
 

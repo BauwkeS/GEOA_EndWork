@@ -44,7 +44,7 @@ public:
 	}
 	void ProcessMouseDownEvent(const SDL_MouseButtonEvent& e)
 	{
-
+		MouseSelectPillar(e);
 	}
 	void ProcessMouseUpEvent(const SDL_MouseButtonEvent& e)
 	{
@@ -81,7 +81,7 @@ private:
 	TwoBlade m_PlayerDirectionRotation{ 0,0,0,0,0,1 };
 	Motor m_PlayerMotor{ Motor::Translation(m_PlayerSpeed,m_PlayerDirection) };
 	bool m_IsRotating{ false };
-	int m_PlayerScore{ 0 };
+	int m_PlayerScore{ 10 };
 
 	// FUNCTIONS
 	void InitializeGameEngine();
@@ -150,6 +150,9 @@ private:
 	void KeyBoardReflectPlayer(const SDL_KeyboardEvent& e);
 	void KeyBoardSpawnNewPillar(const SDL_KeyboardEvent& e);
 
+	//Mouse functions
+	void MouseSelectPillar(const SDL_MouseButtonEvent& e);
+
 	//Overlap functions
 	template <typename T>
 	int CheckOverlapGameItems(const ThreeBlade& pos, int size, const std::vector<std::unique_ptr<T>>& vec)
@@ -159,6 +162,9 @@ private:
 		//game items
 		for (int i = 0; i < vec.size(); ++i)
 		{
+			//if the size is 0, check on size of item
+			if (size == 0) size = vec[i]->GetSize();
+
 			auto bladeDis = vec[i]->GetPos() & ThreeBlade { pos[0], pos[1], 0 };
 			if (abs(bladeDis.Norm()) < static_cast <float>(size / 2 + vec[i]->GetSize() / 2))
 			{
