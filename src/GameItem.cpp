@@ -3,7 +3,7 @@
 void GameItem::Draw() const
 {
 	utils::SetColor(m_Color);
-	utils::FillRect(m_Position[0], m_Position[1], m_Width, m_Height);
+	utils::FillRect(m_Position[0], m_Position[1], m_Size, m_Size);
 }
 
 void Pillar::ColorPillar()
@@ -15,13 +15,13 @@ void Pillar::ColorPillar()
 void Pickup::Draw() const
 {
 	utils::SetColor(m_Color);
-	utils::FillEllipse(m_Position[0], m_Position[1], m_Width, m_Height);
+	utils::FillEllipse(m_Position[0], m_Position[1], m_Size, m_Size);
 }
 
 void Barrier::Draw() const
 {
 	utils::SetColor(m_Color);
-	utils::FillRect(m_Position[0], m_Position[1], m_Width, m_Height);
+	utils::FillRect(m_Position[0], m_Position[1], m_Size,m_Height );
 
 }
 

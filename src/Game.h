@@ -168,23 +168,23 @@ private:
 		//game items
 		for (int i = 0; i < vec.size(); ++i)
 		{
-			if (vec[i]->GetWidth() != vec[i]->GetHeight())
-			{
-				//can only happen with barriers rn
-				Barrier* barrierExists = dynamic_cast<Barrier*>(vec[i].get());
-				if (barrierExists) if (CheckBarrierOverlapDir(pos, size, barrierExists) >= 0) hasHit = i;
-			}
-			else
-			{
-				int vecSize = vec[i]->GetWidth();
-				//if the size is 0, check on size of item
-				if (size == 0) size = vecSize;
+			int vecSize = vec[i]->GetSize();
+			//if the size is 0, check on size of item
+			if (size == 0) size = vecSize;
 
-				auto bladeDis = vec[i]->GetPos() & ThreeBlade { pos[0], pos[1], 0 };
-				if (abs(bladeDis.Norm()) < static_cast <float>(size / 2 + vecSize / 2))
-				{
-					hasHit = i;
-				}
+			ThreeBlade checkPos = { pos[0], pos[1], 0 };
+
+			//if its a barrier, the y coord is overrated
+			Barrier* barrierExists = dynamic_cast<Barrier*>(vec[i].get());
+			if (barrierExists)
+			{
+				checkPos = { pos[0], 0, 0 };
+			}
+
+			auto bladeDis = vec[i]->GetPos() & checkPos;
+			if (abs(bladeDis.Norm()) < static_cast <float>(size / 2 + vecSize / 2))
+			{
+				hasHit = i;
 			}
 		}
 		//nothing hit
@@ -195,5 +195,5 @@ private:
 	int CheckOverlapPillars(ThreeBlade item, int size);
 	int CheckOverlapPickups(ThreeBlade item, int size);
 	int CheckOverlapBarriers(ThreeBlade item, int size);
-	int CheckBarrierOverlapDir(ThreeBlade item, int size, Barrier* b);
+	//int CheckBarrierOverlapDir(ThreeBlade item, int size, Barrier* b);
 };

@@ -265,20 +265,20 @@ void Game::CheckGameCollision()
 		if (boundaryOverlap >= 0)
 		{
 			//see what side to reflect on
-			int direction = CheckBarrierOverlapDir(m_PlayerPosition, m_PlayerSize, m_BarrierVec[boundaryOverlap].get());
+			//int direction = CheckBarrierOverlapDir(m_PlayerPosition, m_PlayerSize, m_BarrierVec[boundaryOverlap].get());
 
 			auto barrier = m_BarrierVec[boundaryOverlap].get();
 			OneBlade ref{};
-			if (direction == 0)
-			{
+	/*		if (direction == 0)
+			{*/
 				//x
 				//check for left or right reflection
 				if (m_PlayerPosition[0] > m_BarrierVec[boundaryOverlap]->GetPos()[0]) //right
 				{
-					ref = { barrier->GetPos()[0]+ barrier->GetWidth(),-1,0,0 };
+					ref = { barrier->GetPos()[0]+ barrier->GetSize(),-1,0,0 };
 				}
 				else ref = { m_BarrierVec[boundaryOverlap]->GetPos()[0],1,0,0 }; // left
-			}
+		//	}
 			//else if (direction == 1)
 			//{
 			//	//y
@@ -493,7 +493,7 @@ void Game::InitGameItems()
 	//barrier
 	m_BarrierVec.emplace_back(std::make_unique<Barrier>(
 		ThreeBlade{ m_Window.width / 2,0,0 },
-		10,m_Window.height/2));
+		10,m_Window.height));
 }
 
 void Game::DrawGameItems() const
@@ -637,38 +637,38 @@ int Game::CheckOverlapBarriers(ThreeBlade pos, int size)
 	return CheckOverlapGameItems(pos, size, m_BarrierVec);
 }
 
-int Game::CheckBarrierOverlapDir(ThreeBlade pos, int size, Barrier* b)
-{
-	//check for what axis hit because the width is different -> to know where to reflect on
-	//x
-	ThreeBlade x = { b->GetPos()[0]+b->GetWidth()/2, 0,0};
-
-	int width = b->GetWidth();
-	//if the size is 0, check on size of item
-	if (size == 0) size = width;
-
-	auto bladeDis = x & ThreeBlade { pos[0] + size/2, 0, 0 };
-	auto test = abs(bladeDis.Norm());
-	if (abs(bladeDis.Norm()) < static_cast <float>(size / 2))
-	{
-		return 0;
-	}
-
-	//y
-	//ThreeBlade y = { 0,b->GetPos()[1]+size/2,0 };
-
-	//int height = b->GetHeight();
-	////if the size is 0, check on size of item
-	//if (size == 0) size = height;
-
-	//bladeDis = y & ThreeBlade{ 0, pos[1], 0 };
-	//if (abs(bladeDis.Norm()) < static_cast <float>(size / 2))
-	//{
-	//	return 1;
-	//}
-
-	return -1;
-}
+//int Game::CheckBarrierOverlapDir(ThreeBlade pos, int size, Barrier* b)
+//{
+//	//check for what axis hit because the width is different -> to know where to reflect on
+//	//x
+//	ThreeBlade x = { b->GetPos()[0]+b->GetWidth()/2, 0,0};
+//
+//	int width = b->GetWidth();
+//	//if the size is 0, check on size of item
+//	if (size == 0) size = width;
+//
+//	auto bladeDis = x & ThreeBlade { pos[0] + size/2, 0, 0 };
+//	auto test = abs(bladeDis.Norm());
+//	if (abs(bladeDis.Norm()) < static_cast <float>(size / 2))
+//	{
+//		return 0;
+//	}
+//
+//	//y
+//	//ThreeBlade y = { 0,b->GetPos()[1]+size/2,0 };
+//
+//	//int height = b->GetHeight();
+//	////if the size is 0, check on size of item
+//	//if (size == 0) size = height;
+//
+//	//bladeDis = y & ThreeBlade{ 0, pos[1], 0 };
+//	//if (abs(bladeDis.Norm()) < static_cast <float>(size / 2))
+//	//{
+//	//	return 1;
+//	//}
+//
+//	return -1;
+//}
 
 
 void Game::Update(float elapsedSec)
