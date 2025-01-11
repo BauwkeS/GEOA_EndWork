@@ -172,16 +172,23 @@ private:
 			//if the size is 0, check on size of item
 			if (size == 0) size = vecSize;
 
+			//get the centers of the items to collision check
 			ThreeBlade checkPos = { pos[0], pos[1], 0 };
+			ThreeBlade itemPos = { vec[i]->GetPos()[0] + vec[i]->GetSize() / 2,
+				vec[i]->GetPos()[1] + vec[i]->GetSize() / 2, 0 };
 
 			//if its a barrier, the y coord is overrated
 			Barrier* barrierExists = dynamic_cast<Barrier*>(vec[i].get());
 			if (barrierExists)
 			{
 				checkPos = { pos[0], 0, 0 };
+				itemPos = { vec[i]->GetPos()[0] + vec[i]->GetSize() / 2,0,0 };
 			}
+			//if its a pickup -> eppise have another center point coord
+			Pickup* pickupExists = dynamic_cast<Pickup*>(vec[i].get());
+			if (pickupExists) itemPos = { vec[i]->GetPos()[0], vec[i]->GetPos()[1], 0 };
 
-			auto bladeDis = vec[i]->GetPos() & checkPos;
+			auto bladeDis = itemPos & checkPos;
 			if (abs(bladeDis.Norm()) < static_cast <float>(size / 2 + vecSize / 2))
 			{
 				hasHit = i;
@@ -195,5 +202,4 @@ private:
 	int CheckOverlapPillars(ThreeBlade item, int size);
 	int CheckOverlapPickups(ThreeBlade item, int size);
 	int CheckOverlapBarriers(ThreeBlade item, int size);
-	//int CheckBarrierOverlapDir(ThreeBlade item, int size, Barrier* b);
 };

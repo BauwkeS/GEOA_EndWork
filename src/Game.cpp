@@ -253,45 +253,25 @@ void Game::CheckGameCollision()
 {
 	//check collision with other game objects
 
-	//pickup
-	PickupCollision();
+	//pickups only possible when over 30 energy
+	if (m_PlayerPosition[2] >= 30) PickupCollision();
 
-	//barrier
+	//barriers
 	//barriers are only passable when you have more than 50 energy
-	//make sure you cannot be stuck ?
 	if (m_PlayerPosition[2] <= 50.f)
 	{
-		int boundaryOverlap = CheckOverlapBarriers(m_PlayerPosition, m_PlayerSize);
+		//get the player center point for easy collision loop
+		auto centerOfPlayer = m_PlayerPosition;
+		centerOfPlayer[0] += m_PlayerSize / 2;
+		centerOfPlayer[1] += m_PlayerSize / 2;
+
+		int boundaryOverlap = CheckOverlapBarriers(centerOfPlayer, m_PlayerSize);
 		if (boundaryOverlap >= 0)
 		{
-			//see what side to reflect on
-			//int direction = CheckBarrierOverlapDir(m_PlayerPosition, m_PlayerSize, m_BarrierVec[boundaryOverlap].get());
+			OneBlade ref = { m_BarrierVec[boundaryOverlap]->GetPos()[0],1,0,0 };
 
-			auto barrier = m_BarrierVec[boundaryOverlap].get();
-			OneBlade ref{};
-	/*		if (direction == 0)
-			{*/
-				//x
-				//check for left or right reflection
-				if (m_PlayerPosition[0] > m_BarrierVec[boundaryOverlap]->GetPos()[0]) //right
-				{
-					ref = { barrier->GetPos()[0]+ barrier->GetSize(),-1,0,0 };
-				}
-				else ref = { m_BarrierVec[boundaryOverlap]->GetPos()[0],1,0,0 }; // left
-		//	}
-			//else if (direction == 1)
-			//{
-			//	//y
-			//	//check for left or right reflection
-			//	if (m_PlayerPosition[1] > m_BarrierVec[boundaryOverlap]->GetPos()[1]) //top
-			//	{
-			//		ref = { barrier->GetPos()[1] + barrier->GetHeight(),0,-1,0 };
-			//	}
-			//	else ref = { barrier->GetPos()[1],0,1,0 }; // left
-			//}
-
-			m_PlayerDirection = (ref * m_PlayerDirection
-				* ~ref).Grade2();
+			if (m_IsRotating) m_PlayerDirectionRotation = -m_PlayerDirectionRotation;
+			else m_PlayerDirection = (ref * m_PlayerDirection * ~ref).Grade2();
 		}
 	}
 }
@@ -349,25 +329,16 @@ void Game::MovePlayer(float deltaTime)
 
 void Game::ReflectPlayer()
 {
-	//distance
-	//try to - the 2 distances to get it and get the distance between 2 points to reflect that
-
-	//translation to the selected pillar
-	//Motor translator{ Motor::Translation(m_PillarsVec[m_SelectedPillar].position.VNorm(),
-	//	TwoBlade(m_PillarsVec[m_SelectedPillar].position[0], m_PillarsVec[m_SelectedPillar].position[1], 0, 0, 0, 0)) };
-
-	//std::cout << "Player was at: x[" << m_PlayerPosition[0] << "], y[" << m_PlayerPosition[1] << "]\n";
 	//full reflection around the pillar
 	auto powerLevel = m_PlayerPosition[2];
 	m_PlayerPosition = (m_PillarsVec[m_SelectedPillar]->GetPos() * m_PlayerPosition * ~m_PillarsVec[m_SelectedPillar]->GetPos()).Grade3();
 	m_PlayerPosition[2] = powerLevel;
-	//std::cout << "Player is NOW at: x[" << m_PlayerPosition[0] << "], y[" << m_PlayerPosition[1] << "]\n";
 
-	//check if the distance is away from the main screen, if so put it at the most far away point
+	//check if off screen, if so put it at the most far away point
 	if (m_PlayerPosition[0] - m_PlayerSize >= m_Window.width) m_PlayerPosition[0] = m_Window.width - m_PlayerSize;
-	else if (m_PlayerPosition[0] <= 0) m_PlayerPosition[0] = 0;
+	else if (m_PlayerPosition[0] <= 0) m_PlayerPosition[0] = m_PlayerSize;
 	else if (m_PlayerPosition[1] + m_PlayerSize >= m_Window.height) m_PlayerPosition[1] = m_Window.height - m_PlayerSize;
-	else if (m_PlayerPosition[1] <= 0) m_PlayerPosition[1] = 0;
+	else if (m_PlayerPosition[1] <= 0) m_PlayerPosition[1] = m_PlayerSize;
 
 }
 
@@ -617,7 +588,8 @@ bool Game::DoesOverlapAll(ThreeBlade pos, int size)
 	bool hasHit{ false };
 
 	if (CheckOverlapPickups(pos, size) >= 0
-		|| CheckOverlapPillars(pos, size)  >= 0) hasHit = true;
+		|| CheckOverlapPillars(pos, size)  >= 0
+		|| CheckOverlapBarriers(pos,size) >= 0) hasHit = true;
 
 	return hasHit;
 }
@@ -636,40 +608,6 @@ int Game::CheckOverlapBarriers(ThreeBlade pos, int size)
 {
 	return CheckOverlapGameItems(pos, size, m_BarrierVec);
 }
-
-//int Game::CheckBarrierOverlapDir(ThreeBlade pos, int size, Barrier* b)
-//{
-//	//check for what axis hit because the width is different -> to know where to reflect on
-//	//x
-//	ThreeBlade x = { b->GetPos()[0]+b->GetWidth()/2, 0,0};
-//
-//	int width = b->GetWidth();
-//	//if the size is 0, check on size of item
-//	if (size == 0) size = width;
-//
-//	auto bladeDis = x & ThreeBlade { pos[0] + size/2, 0, 0 };
-//	auto test = abs(bladeDis.Norm());
-//	if (abs(bladeDis.Norm()) < static_cast <float>(size / 2))
-//	{
-//		return 0;
-//	}
-//
-//	//y
-//	//ThreeBlade y = { 0,b->GetPos()[1]+size/2,0 };
-//
-//	//int height = b->GetHeight();
-//	////if the size is 0, check on size of item
-//	//if (size == 0) size = height;
-//
-//	//bladeDis = y & ThreeBlade{ 0, pos[1], 0 };
-//	//if (abs(bladeDis.Norm()) < static_cast <float>(size / 2))
-//	//{
-//	//	return 1;
-//	//}
-//
-//	return -1;
-//}
-
 
 void Game::Update(float elapsedSec)
 {
