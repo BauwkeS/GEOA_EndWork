@@ -71,8 +71,8 @@ private:
 	const float m_MaxElapsedSeconds;
 
 	//Player
-	ThreeBlade m_PlayerPosition{ m_Window.width / 2,m_Window.height / 2,0 };
 	const float m_PlayerSize{ 20.f };
+	ThreeBlade m_PlayerPosition{ m_Window.width / 2+ m_PlayerSize,m_Window.height / 2,0 };
 	const float m_NormalPlayerSpeed{ 200.f };
 	float m_PlayerSpeed{ m_NormalPlayerSpeed };
 	Color4f m_PlayerColor{ 1,1,1,1 };
@@ -81,7 +81,7 @@ private:
 	TwoBlade m_PlayerDirectionRotation{ 0,0,0,0,0,1 };
 	Motor m_PlayerMotor{ Motor::Translation(m_PlayerSpeed,m_PlayerDirection) };
 	bool m_IsRotating{ false };
-	int m_PlayerScore{ 10 };
+	int m_PlayerScore{ 0 };
 
 	// FUNCTIONS
 	void InitializeGameEngine();
@@ -142,6 +142,12 @@ private:
 	void DrawPickups() const;
 	void PickupCollision();
 
+	//Game items
+	void InitGameItems();
+	void DrawGameItems() const;
+
+	std::vector<std::unique_ptr<Barrier>> m_BarrierVec;
+
 	//Keyboard functions
 	void KeyboardSpeed(const SDL_KeyboardEvent& e);
 	void KeyboardPillar(const SDL_KeyboardEvent& e);
@@ -162,13 +168,23 @@ private:
 		//game items
 		for (int i = 0; i < vec.size(); ++i)
 		{
-			//if the size is 0, check on size of item
-			if (size == 0) size = vec[i]->GetSize();
-
-			auto bladeDis = vec[i]->GetPos() & ThreeBlade { pos[0], pos[1], 0 };
-			if (abs(bladeDis.Norm()) < static_cast <float>(size / 2 + vec[i]->GetSize() / 2))
+			if (vec[i]->GetWidth() != vec[i]->GetHeight())
 			{
-				hasHit = i;
+				//can only happen with barriers rn
+				Barrier* barrierExists = dynamic_cast<Barrier*>(vec[i].get());
+				if (barrierExists) if (CheckBarrierOverlapDir(pos, size, barrierExists) >= 0) hasHit = i;
+			}
+			else
+			{
+				int vecSize = vec[i]->GetWidth();
+				//if the size is 0, check on size of item
+				if (size == 0) size = vecSize;
+
+				auto bladeDis = vec[i]->GetPos() & ThreeBlade { pos[0], pos[1], 0 };
+				if (abs(bladeDis.Norm()) < static_cast <float>(size / 2 + vecSize / 2))
+				{
+					hasHit = i;
+				}
 			}
 		}
 		//nothing hit
@@ -178,4 +194,6 @@ private:
 	bool DoesOverlapAll(ThreeBlade item, int size);
 	int CheckOverlapPillars(ThreeBlade item, int size);
 	int CheckOverlapPickups(ThreeBlade item, int size);
+	int CheckOverlapBarriers(ThreeBlade item, int size);
+	int CheckBarrierOverlapDir(ThreeBlade item, int size, Barrier* b);
 };

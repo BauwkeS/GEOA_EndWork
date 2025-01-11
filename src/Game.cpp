@@ -105,7 +105,7 @@ void Game::InitializeGameEngine()
 	}
 
 	//init own items
-	InitPillars();
+	InitGameItems();
 	PrintGameControls();
 
 	m_Initialized = true;
@@ -253,7 +253,47 @@ void Game::CheckGameCollision()
 {
 	//check collision with other game objects
 
+	//pickup
 	PickupCollision();
+
+	//barrier
+	//barriers are only passable when you have more than 50 energy
+	//make sure you cannot be stuck ?
+	if (m_PlayerPosition[2] <= 50.f)
+	{
+		int boundaryOverlap = CheckOverlapBarriers(m_PlayerPosition, m_PlayerSize);
+		if (boundaryOverlap >= 0)
+		{
+			//see what side to reflect on
+			int direction = CheckBarrierOverlapDir(m_PlayerPosition, m_PlayerSize, m_BarrierVec[boundaryOverlap].get());
+
+			auto barrier = m_BarrierVec[boundaryOverlap].get();
+			OneBlade ref{};
+			if (direction == 0)
+			{
+				//x
+				//check for left or right reflection
+				if (m_PlayerPosition[0] > m_BarrierVec[boundaryOverlap]->GetPos()[0]) //right
+				{
+					ref = { barrier->GetPos()[0]+ barrier->GetWidth(),-1,0,0 };
+				}
+				else ref = { m_BarrierVec[boundaryOverlap]->GetPos()[0],1,0,0 }; // left
+			}
+			//else if (direction == 1)
+			//{
+			//	//y
+			//	//check for left or right reflection
+			//	if (m_PlayerPosition[1] > m_BarrierVec[boundaryOverlap]->GetPos()[1]) //top
+			//	{
+			//		ref = { barrier->GetPos()[1] + barrier->GetHeight(),0,-1,0 };
+			//	}
+			//	else ref = { barrier->GetPos()[1],0,1,0 }; // left
+			//}
+
+			m_PlayerDirection = (ref * m_PlayerDirection
+				* ~ref).Grade2();
+		}
+	}
 }
 
 void Game::VisualizeEnergy()
@@ -335,12 +375,12 @@ void Game::InitPillars()
 {
 	//pillar 1
 	m_PillarsVec.emplace_back(std::make_unique<Pillar>(
-		ThreeBlade{ m_Window.width / 4 * 1,m_Window.height / 3 * 2,1 },
+		ThreeBlade{ m_Window.width / 4 * 1,m_Window.height / 3 * 2,0 },
 		30, true));
 
 	//pillar 2
 	m_PillarsVec.emplace_back(std::make_unique<Pillar>(
-		ThreeBlade{ m_Window.width / 4 * 3,m_Window.height / 3 * 1,1 }, 15));
+		ThreeBlade{ m_Window.width / 4 * 3,m_Window.height / 3 * 1,0 }, 15));
 
 	//assign colors to the pillars
 	m_SelectedPillar = 0;
@@ -442,6 +482,29 @@ void Game::PickupCollision()
 		std::cout << "New player score: " << m_PlayerScore << '\n';
 		auto it = std::find(m_PickupsVec.begin(), m_PickupsVec.end(), m_PickupsVec[pickupHit]);
 		m_PickupsVec.erase(it);
+	}
+}
+
+void Game::InitGameItems()
+{
+	//pillars
+	InitPillars();
+
+	//barrier
+	m_BarrierVec.emplace_back(std::make_unique<Barrier>(
+		ThreeBlade{ m_Window.width / 2,0,0 },
+		10,m_Window.height/2));
+}
+
+void Game::DrawGameItems() const
+{
+	DrawPillars();
+	DrawPickups();
+
+	//barrier
+	for (const auto& b : m_BarrierVec)
+	{
+		b->Draw();
 	}
 }
 
@@ -569,6 +632,45 @@ int Game::CheckOverlapPickups(ThreeBlade pos, int size)
 	return CheckOverlapGameItems(pos, size, m_PickupsVec);
 }
 
+int Game::CheckOverlapBarriers(ThreeBlade pos, int size)
+{
+	return CheckOverlapGameItems(pos, size, m_BarrierVec);
+}
+
+int Game::CheckBarrierOverlapDir(ThreeBlade pos, int size, Barrier* b)
+{
+	//check for what axis hit because the width is different -> to know where to reflect on
+	//x
+	ThreeBlade x = { b->GetPos()[0]+b->GetWidth()/2, 0,0};
+
+	int width = b->GetWidth();
+	//if the size is 0, check on size of item
+	if (size == 0) size = width;
+
+	auto bladeDis = x & ThreeBlade { pos[0] + size/2, 0, 0 };
+	auto test = abs(bladeDis.Norm());
+	if (abs(bladeDis.Norm()) < static_cast <float>(size / 2))
+	{
+		return 0;
+	}
+
+	//y
+	//ThreeBlade y = { 0,b->GetPos()[1]+size/2,0 };
+
+	//int height = b->GetHeight();
+	////if the size is 0, check on size of item
+	//if (size == 0) size = height;
+
+	//bladeDis = y & ThreeBlade{ 0, pos[1], 0 };
+	//if (abs(bladeDis.Norm()) < static_cast <float>(size / 2))
+	//{
+	//	return 1;
+	//}
+
+	return -1;
+}
+
+
 void Game::Update(float elapsedSec)
 {
 	CheckWindowCollision();
@@ -588,7 +690,6 @@ void Game::Draw() const
 	glClearColor(0.f, 0.f, 0.f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	DrawPillars();
-	DrawPickups();
+	DrawGameItems();
 	DrawPlayer();
 }
