@@ -578,6 +578,7 @@ void Game::MouseSelectPillar(const SDL_MouseButtonEvent& e)
 			m_PillarsVec[selectedPillar]->SetSelected(true);
 			m_PlayerScore -= 1;
 			std::cout << "Pillar selected! New score: " << m_PlayerScore << '\n';
+			m_SelectedPillar = selectedPillar;
 		}
 	}
 }
