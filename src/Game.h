@@ -184,7 +184,7 @@ private:
 				checkPos = { pos[0], 0, 0 };
 				itemPos = { vec[i]->GetPos()[0] + vec[i]->GetSize() / 2,0,0 };
 			}
-			//if its a pickup -> eppise have another center point coord
+			//if its a pickup -> elipse have another center point coord
 			Pickup* pickupExists = dynamic_cast<Pickup*>(vec[i].get());
 			if (pickupExists) itemPos = { vec[i]->GetPos()[0], vec[i]->GetPos()[1], 0 };
 
